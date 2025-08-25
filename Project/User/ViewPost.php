@@ -416,7 +416,7 @@ if (isset($_POST['delete_post'])) {
         <div class="post-card">
             <div class="post-header">
                 <div class="post-avatar">
-                    <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row['user_photo']) ?>" alt="<?php echo htmlspecialchars($row['user_name']) ?>">
+                    <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row['user_photo']?:'default.avif') ?>" alt="<?php echo htmlspecialchars($row['user_name']) ?>">
                 </div>
                 <div class="post-user">
                     <h4><?php echo htmlspecialchars($row['user_name']) ?></h4>

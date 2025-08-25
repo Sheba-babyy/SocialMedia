@@ -236,7 +236,7 @@ $data = $res->fetch_assoc();
         
         <form class="post-form" method="post" enctype="multipart/form-data">
             <div class="post-content">
-                <img src="../Assets/Files/UserDocs/<?php echo $data['user_photo']?>" class="user-avatar" alt="User profile picture">
+                <img src="../Assets/Files/UserDocs/<?php echo ($data['user_photo']?:'default.avif')?>" class="user-avatar" alt="User profile picture">
                 <textarea name="txt_caption" class="caption-input" placeholder="What's on your mind?" maxlength="500" id="postCaption"></textarea>
             </div>
             

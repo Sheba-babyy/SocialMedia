@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 include '../Assets/Connection/Connection.php';
 
@@ -6,20 +9,25 @@ if(isset($_POST['btn_create']))
 {
     $grp_name = mysqli_real_escape_string($con, $_POST['txt_grp_name']);
     $grp_description = mysqli_real_escape_string($con, $_POST['txt_description']);
-    $grp_photo = $_FILES['file_grp_photo']['name'];
-    $temp = $_FILES['file_grp_photo']['tmp_name'];
-    move_uploaded_file($temp,"../Assets/Files/GroupDocs/".$grp_photo);
     
-    $insQry="insert into tbl_group(group_name,group_description,group_photo,user_id) values('".$grp_name."','".$grp_description."','".$grp_photo."','".$_SESSION['uid']."')";
-    if($con->query($insQry))
-    {
-        ?>
-        <script>
-        alert('Group Created');
-        window.location="Groups.php";
-        </script>
-        <?php
+    // Handle optional photo
+    if(!empty($_FILES['file_grp_photo']['name'])) {
+        $grp_photo = time()."_".basename($_FILES['file_grp_photo']['name']);
+        $temp = $_FILES['file_grp_photo']['tmp_name'];
+        move_uploaded_file($temp,"../Assets/Files/GroupDocs/".$grp_photo);
+    } else {
+        $grp_photo = "default.png"; // <-- give a default image
     }
+
+    $insQry="INSERT INTO tbl_group(group_name,group_description,group_photo,user_id,group_status) 
+             VALUES('$grp_name','$grp_description','$grp_photo','".$_SESSION['uid']."','active')";
+    if($con->query($insQry)) {
+    echo "<script>alert('Group Created'); window.location='Groups.php';</script>";
+} else {
+    echo "SQL Error: " . $con->error . "<br>";
+    echo "Query: " . $insQry;
+}
+
 }
 ?>
 
@@ -277,7 +285,7 @@ if(isset($_POST['btn_create']))
                 </div>
                 
                 <div class="form-group">
-                    <button type="submit" name="btn_create" id="btn_create" class="btn-submit">
+                    <button type="submit" name="btn_create" class="btn-submit">
                         <i class="fas fa-plus-circle"></i> Create Group
                     </button>
                 </div>

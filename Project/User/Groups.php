@@ -424,7 +424,7 @@ if (isset($_GET['lid'])) {
                             // Get member count for this group
                             $memberCountQry = "SELECT COUNT(*) as count FROM tbl_groupmembers WHERE group_id = '$group_id' AND groupmembers_status = 1";
                             $memberCountRes = $con->query($memberCountQry);
-                            $memberCount = $memberCountRes ? $memberCountRes->fetch_assoc()['count'] : 0;
+                            $memberCount = $memberCountRes ? $memberCountRes->fetch_assoc()['count']+1 : 1;
                             ?>
                             
                             <div class="group-card cover-style">
@@ -432,7 +432,7 @@ if (isset($_GET['lid'])) {
                                     <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($data['group_photo']); ?>" 
                                          class="group-cover-photo" 
                                          alt="<?php echo htmlspecialchars($data['group_name']); ?>"
-                                         onerror="this.src='../Assets/Images/default-group-cover.jpg'">
+                                         onerror="this.src='../Assets/Files/default.png'">
                                 </div>
                                 <div class="group-info">
                                     <h3 class="group-name"><?php echo htmlspecialchars($data['group_name']); ?></h3>

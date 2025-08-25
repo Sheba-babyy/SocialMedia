@@ -333,7 +333,7 @@ if($resFriend->num_rows > 0){
     <div class="main-container">
         <aside class="profile-sidebar">
             <div class="profile-card">
-                <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']) ?>" class="profile-picture" alt="Profile Picture">
+                <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']?:'default.avif') ?>" class="profile-picture" alt="Profile Picture">
                 <h1 class="profile-name"><?php echo htmlspecialchars($data['user_name']) ?></h1>
 
                 <?php if (!empty($data['user_bio'])): ?>

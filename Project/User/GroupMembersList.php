@@ -11,7 +11,7 @@ if (!isset($_SESSION['uid']) || !isset($_GET['gmlid'])) {
 $uid = mysqli_real_escape_string($con, $_SESSION['uid']);
 $group_id = mysqli_real_escape_string($con, $_GET['gmlid']);
 
-// Check if user is group owner or admin
+// Check if user is group owner
 $ownerQry = "SELECT * FROM tbl_group WHERE group_id = '$group_id' AND user_id = '$uid'";
 $isOwner = $con->query($ownerQry)->num_rows > 0;
 
@@ -205,27 +205,33 @@ if (isset($_GET['rid']) && ($isOwner || $isAdmin)) {
 <body>
     <div class="member-list">
         <?php
-        $selQry = "SELECT gm.*, u.user_id, u.user_name, u.user_photo 
+        $selQry = "SELECT u.user_id, u.user_name, u.user_photo,'member' as role 
                    FROM tbl_groupmembers gm 
                    INNER JOIN tbl_user u ON gm.user_id = u.user_id 
-                   WHERE gm.group_id = '$group_id' AND gm.groupmembers_status = '1'";
+                   WHERE gm.group_id = '$group_id' AND gm.groupmembers_status = '1' 
+                   union 
+                   select u.user_id, u.user_name, u.user_photo,'owner' as role from tbl_group g INNER JOIN tbl_user u ON g.user_id = u.user_id
+                   WHERE g.group_id = '$group_id'";
         $res = $con->query($selQry);
         
         if ($res && $res->num_rows > 0) {
             while ($data = $res->fetch_assoc()) {
+                $memberId = isset($data['groupmembers_id']) ? $data['groupmembers_id'] : 0;
                 ?>
                 <div class="member-item" 
                 onclick="if('<?php echo $data['user_id']; ?>' !== '<?php echo $uid; ?>') 
-                  showActionMenu('<?php echo $data['user_id']; ?>', '<?php echo htmlspecialchars($data['user_name']); ?>', '<?php echo $data['groupmembers_id']; ?>', <?php echo ($isOwner || $isAdmin) ? 'true' : 'false'; ?>)">
+                  showActionMenu('<?php echo $data['user_id']; ?>', '<?php echo htmlspecialchars($data['user_name']); ?>', '<?php echo $memberId ?>', <?php echo ($isOwner || $isAdmin) ? 'true' : 'false'; ?>)">
 
                     <div class="member-photo">
                         <?php if (!empty($data['user_photo'])) { ?>
-                            <img src="../Assets/Files/UserDocs/<?php echo $data['user_photo']; ?>" onerror="this.style.display='none'; this.parentNode.innerHTML='<i class=\'fas fa-user\'></i>'">
+                            <img src="../Assets/Files/UserDocs/<?php echo ($data['user_photo']?:'default.avif') ?>" onerror="this.style.display='none'; this.parentNode.innerHTML='<i class=\'fas fa-user\'></i>'">
                         <?php } else { ?>
                             <i class="fas fa-user" style="color: #a0a0a0;"></i>
                         <?php } ?>
                     </div>
-                    <div class="member-name"><?php echo htmlspecialchars($data['user_name']); ?></div>
+                    <div class="member-name"><?php echo htmlspecialchars($data['user_name']); ?>
+                    <?php if ($data['role'] === 'owner') echo "<span style='color: #0f0; font-size: 12px;'> (Owner)</span>"; ?>
+                </div>
                 </div>
                 <?php
             }

@@ -79,7 +79,7 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
     /* Profile sidebar */
     .profile-sidebar {
         width: 300px;
-        position: fixed;
+        position: sticky;
         top: 100px;
         height: fit-content;
         overflow-y: auto; 
@@ -237,7 +237,7 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
     /* Posts section */
     .posts-section {
         flex-grow: 1;
-        margin-left:350px;
+        /* margin-left:350px; */
     }
     
     .section-title {
@@ -344,7 +344,7 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
         <div class="profile-sidebar">
             <div class="profile-card">
                 <div class="profile-header">
-                    <img src="../Assets/Files/UserDocs/<?=htmlspecialchars($profileData['user_photo'])?>" 
+                    <img src="../Assets/Files/UserDocs/<?=htmlspecialchars($profileData['user_photo']?:'default.avif')?>" 
                          alt="Profile Photo" class="profile-avatar">
                     <h2 class="profile-name"><?=htmlspecialchars($profileData['user_name'])?></h2>
                     <p class="profile-bio"><?=htmlspecialchars($profileData['user_bio'] ?? 'No bio yet')?></p>
@@ -402,7 +402,7 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
                 <!-- Enhanced Create Post Card -->
                 <div class="create-post-card" onclick="window.location.href='Post.php'">
                     <div class="create-post-header">
-                        <img src="../Assets/Files/UserDocs/<?=htmlspecialchars($profileData['user_photo'])?>" 
+                        <img src="../Assets/Files/UserDocs/<?=htmlspecialchars($profileData['user_photo']?:'default.avif')?>" 
                              class="create-post-avatar" alt="Your profile">
                         <div class="create-post-prompt">What's on your mind?</div>
                     </div>

@@ -570,7 +570,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                 <div class="post-header">
                     <div class="post-avatar">
 
-                        <img src="../Assets/Files/UserDocs/<?php echo $datauser['user_photo'] ?>" alt="User">
+                        <img src="../Assets/Files/UserDocs/<?php echo ($datauser['user_photo']?:'default.avif') ?>" alt="">
 
                     </div>
                     <div class="post-user">
@@ -606,7 +606,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                 <div class="post-header">
                     <div class="post-avatar">
                         <a href="ViewProfile.php?pid=<?php echo $post['user_id']?>"><img
-                                src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($post['user_photo']) ?>"
+                                src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($post['user_photo']?:'default.avif') ?>"
                                 alt="<?php echo htmlspecialchars($post['user_name']) ?>"></a>
                     </div>
                     <div class="post-user">
@@ -694,7 +694,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                     while ($suggestion = $suggestion_result->fetch_assoc()) { ?>
                 <div class="suggestion">
                     <div class="suggestion-avatar">
-                        <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($suggestion['user_photo']) ?>"
+                        <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($suggestion['user_photo']?:'default.avif') ?>"
                             alt="<i class='far fa-user'></i>">
                     </div>
                     <div class="suggestion-info">
@@ -721,7 +721,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                     while ($group = $group_suggestion_result->fetch_assoc()) { ?>
                 <div class="suggestion">
                     <div class="suggestion-avatar">
-                        <img src="../Assets/Files/GroupDocs/<?php echo $group['group_photo'] ?>" alt="">
+                        <img src="../Assets/Files/GroupDocs/<?php echo ($group['group_photo']?:'default.png') ?>" alt="">
                     </div>
                     <div class="suggestion-info">
                         <h4>

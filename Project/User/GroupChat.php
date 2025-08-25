@@ -19,12 +19,24 @@ if (!$groupResult || $groupResult->num_rows == 0) {
 }
 $row = $groupResult->fetch_assoc();
 
-// Check if user is a member of the group
-$memberCheck = "SELECT * FROM tbl_groupmembers WHERE user_id = '$uid' AND group_id = '$groupId' AND groupmembers_status = 1";
-$memberResult = $con->query($memberCheck);
-if ($memberResult->num_rows == 0) {
-    echo "<script>alert('You are not a member of this group'); window.location='Groups.php';</script>";
-    exit;
+// Check if user is the owner of the group
+$isOwnerQry = "SELECT * FROM tbl_group WHERE group_id = '$groupId' AND user_id = '$uid'";
+$isOwnerRes = $con->query($isOwnerQry);
+
+if ($isOwnerRes && $isOwnerRes->num_rows > 0) {
+    //  User is the owner → allow access
+} else {
+    //  Otherwise, must be an approved member
+    $memberCheck = "SELECT * FROM tbl_groupmembers 
+                    WHERE user_id = '$uid' 
+                    AND group_id = '$groupId' 
+                    AND groupmembers_status = 1";
+    $memberResult = $con->query($memberCheck);
+
+    if ($memberResult->num_rows == 0) {
+        echo "<script>alert('You are not a member of this group'); window.location='Groups.php';</script>";
+        exit;
+    }
 }
 
 // Check if user is admin
