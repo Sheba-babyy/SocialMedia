@@ -282,7 +282,7 @@ if (isset($_GET['ufid'])) {
                 while ($data = $res->fetch_assoc()) {
                     ?>
                     <div class="friend-item">
-                        <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']); ?>" 
+                        <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']?:'default.avif') ?>" 
                              class="user-avatar" 
                              alt="<?php echo htmlspecialchars($data['user_name']); ?>"
                              onclick="window.location='ViewProfile.php?pid=<?= $data['user_id']; ?>'">

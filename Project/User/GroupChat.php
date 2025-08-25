@@ -407,7 +407,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             <?php if(empty($row["group_photo"])): ?>
                 <i class="fas fa-users group-icon"></i>
             <?php else: ?>
-                <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($row["group_photo"]) ?>" 
+                <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($row["group_photo"]?:'default.png') ?>" 
                      alt="Group Icon" 
                      onerror="this.onerror=null;this.className='group-icon-fallback';this.innerHTML='<i class=\'fas fa-users\'></i>';">
             <?php endif; ?>
@@ -418,7 +418,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
     </div>
     <div class="chat-container">
         <div class="chat-header">
-            <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($row["group_photo"]) ?>" alt="Group Photo" onclick="openGroupModal()">
+            <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($row["group_photo"]?:'default.png') ?>" alt="Group Photo" onclick="openGroupModal()">
             <div class="group-info">
                <a href="GroupInfo.php?id=<?php echo $groupId ?>"> <h3><?php echo htmlspecialchars($row["group_name"]) ?></h3>
                 <input type="hidden" id="groupId" value="<?php echo $groupId ?>"></a>

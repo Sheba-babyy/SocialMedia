@@ -262,7 +262,7 @@ $uid = mysqli_real_escape_string($con, $_SESSION['uid']);
                     while ($data = $res->fetch_assoc()) {
                         ?>
                         <a href="Chat.php?id=<?php echo $data['user_id']; ?>" class="chat-item">
-                            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']); ?>" 
+                            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($data['user_photo']?:'default.avif') ?>" 
                                  class="user-avatar" 
                                  alt="<?php echo htmlspecialchars($data['user_name']); ?>">
                             <div class="user-info">

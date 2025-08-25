@@ -37,7 +37,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_comments') {
     while ($r = $res->fetch_assoc()) {
         $out[] = [
             'name' => $r['user_name'],
-            'photo' => $r['user_photo'] ?: 'default-user.png',
+            'photo' => $r['user_photo'] ?: 'default.avif',
             'text' => nl2br(htmlspecialchars($r['comment_text'])),
             'date' => $r['comment_date']
         ];
@@ -90,7 +90,7 @@ if (isset($_GET['q'])) {
         if ($users->num_rows) {
             while ($u = $users->fetch_assoc()) {
                 $name = htmlspecialchars($u['user_name']);
-                $photo = htmlspecialchars($u['user_photo'] ?: 'default-user.png');
+                $photo = htmlspecialchars($u['user_photo'] ?: 'default.avif');
                 $uidEsc = (int)$u['user_id'];
                 echo "<a class='s-user' href='ViewProfile.php?pid={$uidEsc}'>
                         <img src='../Assets/Files/UserDocs/{$photo}' class='s-photo'>
@@ -101,7 +101,7 @@ if (isset($_GET['q'])) {
         if ($groups->num_rows) {
             while ($g = $groups->fetch_assoc()) {
                 $gname = htmlspecialchars($g['group_name']);
-                $gphoto = htmlspecialchars($g['group_photo'] ?: 'default-group.png');
+                $gphoto = htmlspecialchars($g['group_photo'] ?: 'default.png');
                 $gid = (int)$g['group_id'];
                 $link = $g['is_member'] ? "GroupChat.php?id={$gid}" : "Groups.php?id={$gid}";
                 echo "<a class='s-group' href='{$link}'>
@@ -122,7 +122,7 @@ if (isset($_GET['q'])) {
     if ($users->num_rows) {
         while ($u = $users->fetch_assoc()) {
             $name = htmlspecialchars($u['user_name']);
-            $photo = htmlspecialchars($u['user_photo'] ?: 'default-user.png');
+            $photo = htmlspecialchars($u['user_photo'] ?: 'default.avif');
             $uidEsc = (int)$u['user_id'];
             echo "<div class='res-user'><img src='../Assets/Files/UserDocs/{$photo}' class='r-photo'><a href='ViewProfile.php?pid={$uidEsc}'>{$name}</a></div>";
         }
@@ -134,7 +134,7 @@ if (isset($_GET['q'])) {
     if ($groups->num_rows) {
         while ($g = $groups->fetch_assoc()) {
             $gname = htmlspecialchars($g['group_name']);
-            $gphoto = htmlspecialchars($g['group_photo'] ?: 'default-group.png');
+            $gphoto = htmlspecialchars($g['group_photo'] ?: 'default.png');
             $gid = (int)$g['group_id'];
             $is_member = intval($g['is_member']);
             $link = $is_member ? "GroupChat.php?id={$gid}" : "Groups.php?id={$gid}";
@@ -162,7 +162,7 @@ if (isset($_GET['q'])) {
         while ($p = $posts->fetch_assoc()) {
             $pid = (int)$p['post_id'];
             $author = htmlspecialchars($p['user_name']);
-            $authorPhoto = htmlspecialchars($p['user_photo'] ?: 'default-user.png');
+            $authorPhoto = htmlspecialchars($p['user_photo'] ?: 'default.avif');
             $cap = nl2br(htmlspecialchars($p['post_caption']));
             $date = htmlspecialchars(date('M j, Y', strtotime($p['post_date'])));
             $media = htmlspecialchars($p['post_photo']);
@@ -617,7 +617,7 @@ $(function(){
                 if (!list.length) html = '<div class="no-results">No comments yet</div>';
                 else {
                     list.forEach(function(c){
-                        html += `<div class="comment-item"><img class="c-photo" src="../Assets/Files/UserDocs/${c.photo}"><div><strong>${c.name}</strong><div style="font-size:13px;color:var(--text-secondary)">${c.date}</div><div style="margin-top:6px">${c.text}</div></div></div>`;
+                        html += `<div class="comment-item"><img class="c-photo" src="../Assets/Files/UserDocs/${c.photo || 'default.avif'}"><div><strong>${c.name}</strong><div style="font-size:13px;color:var(--text-secondary)">${c.date}</div><div style="margin-top:6px">${c.text}</div></div></div>`;
                     });
                 }
                 $('#modalComments').html(html);
@@ -651,7 +651,7 @@ $(function(){
                     if (!list.length) html = '<div class="no-results">No comments yet</div>';
                     else {
                         list.forEach(function(c){
-                            html += `<div class="comment-item"><img class="c-photo" src="../Assets/Files/UserDocs/${c.photo}"><div><strong>${c.name}</strong><div style="font-size:13px;color:var(--text-secondary)">${c.date}</div><div style="margin-top:6px">${c.text}</div></div></div>`;
+                            html += `<div class="comment-item"><img class="c-photo" src="../Assets/Files/UserDocs/${c.photo || 'default.avif'}"><div><strong>${c.name}</strong><div style="font-size:13px;color:var(--text-secondary)">${c.date}</div><div style="margin-top:6px">${c.text}</div></div></div>`;
                         });
                     }
                     $('#modalComments').html(html);

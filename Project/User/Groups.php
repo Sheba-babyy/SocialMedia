@@ -429,7 +429,7 @@ if (isset($_GET['lid'])) {
                             
                             <div class="group-card cover-style">
                                 <div class="group-cover-container">
-                                    <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($data['group_photo']); ?>" 
+                                    <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($data['group_photo']?:'default.png')?>" 
                                          class="group-cover-photo" 
                                          alt="<?php echo htmlspecialchars($data['group_name']); ?>"
                                          onerror="this.src='../Assets/Files/default.png'">

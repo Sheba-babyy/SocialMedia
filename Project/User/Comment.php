@@ -432,7 +432,7 @@ $commentResult = $con->query($selComments);
         <div class="post-card">
             <div class="post-header">
                 <div class="post-avatar">
-                    <img src="../Assets/Files/UserDocs/<?php echo $postData['user_photo'] ?>" alt="User">
+                    <img src="../Assets/Files/UserDocs/<?php echo ($postData['user_photo']?:'default.avif') ?>" alt="User">
                 </div>
                 <div class="post-user">
                     <h4><?php echo htmlspecialchars($postData['user_name']) ?></h4>
@@ -486,7 +486,7 @@ $commentResult = $con->query($selComments);
                 <?php while ($commentData = $commentResult->fetch_assoc()) { ?>
                     <div class="comment">
                         <div class="comment-avatar">
-                            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($commentData['user_photo']) ?>" alt="User">
+                            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($commentData['user_photo']?:'default.avif') ?>" alt="User">
                         </div>
                         <div class="comment-content">
                             <div class="comment-header">

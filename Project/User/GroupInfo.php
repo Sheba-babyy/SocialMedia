@@ -433,7 +433,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['report_submit'])) {
     <div class="container">
         <div class="glass-card">
             <div class="group-photo-container">
-                <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($groupData['group_photo']); ?>" alt="Group Photo" class="group-photo" onerror="this.src='https://via.placeholder.com/150/0A0A0A/AFAFAF?text=Group'">
+                <img src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($groupData['group_photo']?:'default.png') ?>" alt="Group Photo" class="group-photo" onerror="this.src='https://via.placeholder.com/150/0A0A0A/AFAFAF?text=Group'">
                 <?php if ($isOwner) { ?>
                     <button class="photo-edit-overlay" onclick="openModal('editModal')">
                         <i class="fas fa-camera"></i>
@@ -491,7 +491,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['report_submit'])) {
                 
                 <div class="form-group">
                     <label for="group_photo_file" class="photo-upload-label">
-                        <img id="photo-preview" src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($groupData['group_photo']); ?>" alt="Group Photo" class="round-photo-preview" onerror="this.src='https://via.placeholder.com/150/0A0A0A/AFAFAF?text=New+Photo'">
+                        <img id="photo-preview" src="../Assets/Files/GroupDocs/<?php echo htmlspecialchars($groupData['group_photo']?:'default.png') ?>" alt="Group Photo" class="round-photo-preview" onerror="this.src='https://via.placeholder.com/150/0A0A0A/AFAFAF?text=New+Photo'">
                     </label>
                     <input type="file" id="group_photo_file" name="group_photo" accept="image/*" style="display: none;">
                 </div>

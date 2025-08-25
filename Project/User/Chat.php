@@ -345,13 +345,13 @@ if ($friendResult->num_rows == 0) {
     <div class="user-modal" id="userModal">
         <div class="user-content">
             <i class="fas fa-times close-user" onclick="closeUserModal()"></i>
-            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row["user_photo"]) ?>" alt="User Photo">
+            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row["user_photo"]?:'default.avif') ?>" alt="User Photo">
             <h3><?php echo htmlspecialchars($row["user_name"]) ?></h3>
         </div>
     </div>
     <div class="chat-container">
         <div class="chat-header">
-            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row["user_photo"]) ?>" alt="User Photo" onclick="openUserModal()">
+            <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row["user_photo"]?:'default.avif') ?>" alt="User Photo" onclick="openUserModal()">
             <div class="user-info">
                 <h3><?php echo htmlspecialchars($row["user_name"]) ?></h3>
                 <input type="hidden" id="recipientId" value="<?php echo $recipientId ?>">

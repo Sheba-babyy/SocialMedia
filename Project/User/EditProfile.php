@@ -212,7 +212,7 @@ if(isset($_POST['btn_update']))
     <form id="form1" name="form1" method="post" action="" enctype="multipart/form-data">
         <div class="photo-upload-container">
             <div style="position: relative; display: inline-block;">
-                <img src="../Assets/Files/UserDocs/<?php echo $data['user_photo'] ?>" class="round-photo" alt="Profile Photo" id="profilePreview">
+                <img src="../Assets/Files/UserDocs/<?php echo ($data['user_photo']?:'default.avif') ?>" class="round-photo" alt="Profile Photo" id="profilePreview">
                 <label for="file_photo" class="edit-icon">
                     <i class="fas fa-pencil-alt"></i>
                 </label>

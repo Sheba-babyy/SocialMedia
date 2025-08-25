@@ -369,7 +369,7 @@ body {
             <div class="review-item" data-id="<?php echo $row['feedback_id']; ?>">
                 <div class="review-header">
                     <div class="user-photo">
-                    <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row['user_photo']);?>" width="40px" height="40px"></div>
+                    <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($row['user_photo']?:'default.avif')?>" width="40px" height="40px"></div>
                     <div>
                         <div class="user-name"><?php echo htmlspecialchars($row['user_name']); ?></div>
                         <div style="display: flex; gap: 5px;">
@@ -478,7 +478,7 @@ function loadComments(fid) {
         const list = document.getElementById(`comments-list-${fid}`);
         list.innerHTML = d.comments.map(c => `
             <div class="comment-item">
-                <img src="../Assets/Files/UserDocs/${c.user_photo}" width="30" height="30">
+                <img src="../Assets/Files/UserDocs/${c.user_photo || 'default.avif'}" width="30" height="30">
                 <div>
                     <div class="comment-author">${c.user_name}</div>
                     <div class="comment-text">${c.comment_text}</div>
