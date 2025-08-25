@@ -461,9 +461,9 @@ $totalPages = ceil($totalRows / $limit);
                                 <tr onclick="window.location.href='../Admin/UserProfile.php?pid=<?php echo $data['user_id'] ?>'">
                                     <td><?php echo $i++; ?></td>
                                     <td>
-                                        <img src="../Assets/Files/UserDocs/<?php echo $data['user_photo']?>" 
+                                        <img src="../Assets/Files/UserDocs/<?php echo ($data['user_photo']?:'default.avif')?>" 
                                              alt="User Photo" class="user-photo"
-                                             onerror="this.src='https://via.placeholder.com/60x60?text=No+Image'">
+                                             onerror="this.src='../Assets/Files/UserDocs/default.avif'">
                                     </td>
                                     <td><?php echo $data['user_name'] ?></td>
                                     <td><?php echo strlen($data['user_bio']) > 50 ? substr($data['user_bio'], 0, 50) . '...' : $data['user_bio']; ?></td>
@@ -544,7 +544,7 @@ $totalPages = ceil($totalRows / $limit);
         // Handle image errors
         document.querySelectorAll('.user-photo').forEach(img => {
             img.addEventListener('error', function() {
-                this.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                this.src = '../Assets/Files/UserDocs/default.avif';
             });
         });
         

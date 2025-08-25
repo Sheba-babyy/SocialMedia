@@ -485,8 +485,8 @@ if (isset($_GET['delete_post'])) {
                 <?php endif; ?>
 
                 <div class="profile-header">
-                    <img src="../Assets/Files/UserDocs/<?php echo $user['user_photo']; ?>" 
-                         onerror="this.src='https://via.placeholder.com/120x120?text=No+Image'">
+                    <img src="../Assets/Files/UserDocs/<?php echo ($user['user_photo']?:'default.avif') ?>" 
+                         onerror="this.src='../Assets/Files/UserDocs/default.avif'">
                     <div class="profile-info">
                         <h2><?php echo htmlspecialchars($user['user_name']); ?></h2>
                         <p><?php echo htmlspecialchars($user['user_email']); ?></p>

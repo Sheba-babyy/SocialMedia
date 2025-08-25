@@ -390,7 +390,7 @@ if (isset($_GET['delete'])) {
                         if ($res->num_rows > 0) {
                             while($data = $res->fetch_assoc()) {
                                 echo "<tr>
-                                        <td><img src='../Assets/Files/UserDocs/{$data['user_photo']}' class='user-photo' alt='{$data['user_name']}'></td>
+                                        <td><img src='../Assets/Files/UserDocs/{$data['user_photo'] ?: 'default.avif'}' class='user-photo' alt='{$data['user_name']}' onerror=\"this.src='../Assets/Files/UserDocs/default.avif'\"></td>
                                         <td>{$data['user_name']}</td>
                                         <td>{$data['feedback_content']}</td>
                                         <td>" . date('M j, Y g:i A', strtotime($data['feedback_date'])) . "</td>
