@@ -23,7 +23,7 @@ if(isset($_POST['btn_submit']))
         ?>
         <script>
         alert("Account created successfully!");
-        window.location="NewUser.php";
+        window.location="Login.php";
         </script>
         <?php
     }
