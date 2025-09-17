@@ -28,19 +28,20 @@ if ($post_result->num_rows == 0) {
 }
 $post_data = $post_result->fetch_assoc();
 
+// Prepare shared marker
+$sharedMarker = "SHARED_POST:" . $original_post_id;
+$file = !empty($post_data['post_photo']) ? $post_data['post_photo'] : "";
+
 // 1️⃣ Share to selected friends
 $friends = $_POST['friends'] ?? [];
 if (!empty($friends)) {
-    $stmt = $con->prepare("INSERT INTO tbl_chat (user_from_id, user_to_id, chat_content, chat_file, chat_datetime) VALUES (?, ?, ?, ?, NOW())");
+    $stmt = $con->prepare("INSERT INTO tbl_chat 
+        (user_from_id, user_to_id, chat_content, chat_file, chat_datetime) 
+        VALUES (?, ?, ?, ?, NOW())");
+
     foreach ($friends as $friend_id) {
         $friend_id = intval($friend_id);
-
-        $content = "[Shared Post] " . $post_data['post_caption'] .
-                   "<br><a href='ViewSharedPost.php?pid=" . $post_data['post_id'] . "' target='_blank'>View Original Post</a>";
-
-        $file = $post_data['post_photo'] ?: '';
-
-        $stmt->bind_param("iiss", $uid, $friend_id, $content, $file);
+        $stmt->bind_param("iiss", $uid, $friend_id, $sharedMarker, $file);
         $stmt->execute();
     }
     $stmt->close();
@@ -49,16 +50,13 @@ if (!empty($friends)) {
 // 2️⃣ Share to selected groups
 $groups = $_POST['groups'] ?? [];
 if (!empty($groups)) {
-    $stmt = $con->prepare("INSERT INTO tbl_groupchat (user_from_id, group_id, groupchat_content, groupchat_file, groupchat_datetime) VALUES (?, ?, ?, ?, NOW())");
+    $stmt = $con->prepare("INSERT INTO tbl_groupchat 
+        (user_from_id, group_id, groupchat_content, groupchat_file, groupchat_datetime) 
+        VALUES (?, ?, ?, ?, NOW())");
+
     foreach ($groups as $group_id) {
         $group_id = intval($group_id);
-
-        $content = "[Shared Post] " . $post_data['post_caption'] .
-                   "<br><a href='ViewSharedPost.php?pid=" . $post_data['post_id'] . "' target='_blank'>View Original Post</a>";
-
-        $file = $post_data['post_photo'] ?: null;
-
-        $stmt->bind_param("iiss", $uid, $group_id, $content, $file);
+        $stmt->bind_param("iiss", $uid, $group_id, $sharedMarker, $file);
         $stmt->execute();
     }
     $stmt->close();

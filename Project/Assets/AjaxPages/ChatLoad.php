@@ -22,11 +22,12 @@ while ($data = $result->fetch_assoc()) {
         $currentDate = $messageDate;
         echo "<div class='date-divider'>" . date('M d, Y', strtotime($currentDate)) . "</div>";
     }
-    
+
     $isSent = $data["user_from_id"] == $_SESSION["uid"];
     $messageClass = $isSent ? "sent" : "received";
     ?>
     <div class="message <?php echo $messageClass ?>" data-chat-id="<?php echo $data['chat_id'] ?>">
+
         <?php 
         // ✅ CASE 1: Profile Share
         if (!empty($data["chat_file"]) && strpos($data["chat_file"], "profile_") === 0) {
@@ -46,22 +47,66 @@ while ($data = $result->fetch_assoc()) {
                 <?php
             }
         }
-        // ✅ CASE 2: Normal File (image/doc)
-        else if (!empty($data["chat_file"])) { ?>
-            <div class="file-preview">
-                <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["chat_file"])) { ?>
-                    <img src="../Assets/Files/Chat/<?php echo $data["chat_file"]?>" alt="Attachment">
-                <?php } else { ?>
-                    <a href="../Assets/Files/Chat/<?php echo $data["chat_file"] ?>" target="_blank">Download File</a>
-                <?php } ?>
+
+// ✅ CASE: Shared Post
+else if (!empty($data["chat_content"]) && strpos($data["chat_content"], "SHARED_POST:") === 0) {
+    $postId = intval(str_replace("SHARED_POST:", "", $data["chat_content"]));
+    $postRes = $con->query("SELECT * FROM tbl_post WHERE post_id = $postId");
+    if ($postRes && $postRes->num_rows > 0) {
+        $post = $postRes->fetch_assoc();
+        $file = $post['post_photo'];
+        ?>
+        <div class="shared-post-card" onclick="window.location='ViewSharedPost.php?pid=<?php echo $postId ?>'">
+            <?php 
+            if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $file)) { ?>
+                <img src="../Assets/Files/Post/<?php echo htmlspecialchars($file) ?>" 
+                     class="shared-post-img">
+            <?php } elseif (preg_match('/\.(mp4|webm|ogg)$/i', $file)) { 
+                $ext = pathinfo($file, PATHINFO_EXTENSION); ?>
+                <video class="shared-post-video" controls style="max-width:250px; border-radius:8px;">
+                    <source src="../Assets/Files/Post/<?php echo htmlspecialchars($file) ?>" type="video/<?php echo strtolower($ext) ?>">
+                    Your browser does not support the video tag.
+                </video>
+            <?php } ?>
+
+            <div class="shared-post-caption">
+                <?php echo htmlspecialchars($post['post_caption']) ?>
             </div>
-        <?php } 
-        
-        // ✅ CASE 3: Normal Text
-        if (!empty($data["chat_content"])) { ?>
+            <div class="shared-post-link">👉 View Original Post</div>
+        </div>
+        <?php
+    }
+}
+
+        // ✅ CASE 2: Normal File (image/video/doc)
+else if (!empty($data["chat_file"])) { ?>
+    <div class="file-preview">
+        <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["chat_file"])) { ?>
+            <!-- Clickable image -->
+            <a href="../Assets/Files/Chat/<?php echo $data["chat_file"] ?>" target="_blank">
+                <img src="../Assets/Files/Chat/<?php echo $data["chat_file"]?>" alt="Attachment">
+            </a>
+       <?php } elseif (preg_match('/\.(mp4|webm|ogg)$/i', $data["chat_file"])) { ?>
+    <!-- Playable video -->
+    <?php $ext = pathinfo($data["chat_file"], PATHINFO_EXTENSION); ?>
+    <video controls style="max-width:200px; border-radius:8px;">
+        <source src="../Assets/Files/Chat/<?php echo htmlspecialchars($data["chat_file"]) ?>" type="video/<?php echo strtolower($ext) ?>">
+        Your browser does not support the video tag.
+    </video>
+<?php } 
+ else { ?>
+            <!-- Other files as download -->
+            <a href="../Assets/Files/Chat/<?php echo $data["chat_file"] ?>" target="_blank">Download File</a>
+        <?php } ?>
+    </div>
+<?php }
+
+
+        // ✅ CASE 4: Normal Text
+        if (!empty($data["chat_content"]) && strpos($data["chat_content"], "SHARED_POST:") !== 0) { ?>
             <div class="message-content"><?php echo htmlspecialchars($data["chat_content"]) ?></div>
         <?php } ?>
-        
+
         <div class="message-time"><?php echo date('h:i A', strtotime($data["chat_datetime"])) ?></div>
         <?php if ($isSent) { ?>
             <span class="delete-btn" onclick="deleteMessage(<?php echo $data['chat_id'] ?>)">

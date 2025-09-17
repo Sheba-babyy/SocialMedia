@@ -39,334 +39,404 @@ if ($friendResult->num_rows == 0) {
     <title>Chat with <?php echo htmlspecialchars($row["user_name"]) ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
-            background-color: #f0f2f5;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+        /* Body & Container */
+body {
+    background-color: #f0f2f5;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
 
-        .chat-container {
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
-            position: relative;
-        }
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
+    height: 90vh;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
 
-        .chat-header {
-            background: #E53935;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .chat-header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .chat-header .user-info {
-            flex: 1;
-        }
-
-        .chat-header .user-info h3 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .chat-header .options {
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        .chat-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .chat-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-body::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
-
-        .message {
-            max-width: 70%;
-            padding: 8px 12px;
-            border-radius: 8px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .message.sent {
-            background: #dcf8c6;
-            align-self: flex-end;
-            margin-left: auto;
-            border-bottom-right-radius: 2px;
-        }
-
-        .message.received {
-            background: white;
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
-        }
-
-        .sender-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: #667781;
-        }
-
-        .sender-photo {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .sender-name {
-            font-weight: 500;
-        }
-
-        .message-content {
-            word-break: break-word;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .message-time {
-            font-size: 11px;
-            color: #667781;
-            align-self: flex-end;
-        }
-
-        .message .delete-btn {
-            display: none;
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            cursor: pointer;
-            color: #ff4444;
-            font-size: 14px;
-        }
-
-        .message.sent:hover .delete-btn {
-            display: block;
-        }
-
-        .file-preview {
-            margin-top: 8px;
-            max-width: 200px;
-        }
-
-        .file-preview img {
-            max-width: 100%;
-            border-radius: 8px;
-        }
-
-        .date-divider {
-            text-align: center;
-            color: #667781;
-            font-size: 12px;
-            margin: 15px 0;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 5px;
-            border-radius: 5px;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .chat-footer {
-            padding: 10px 20px;
-            background: #f0f2f5;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-top: 1px solid #d9d9d9;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 20px;
-            background: white;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .send-btn, .attach-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color:#E53935;
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .user-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .user-content {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            max-width: 400px;
-        }
-
-        .user-content img {
-            width: 200px;
-            height: 200px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-
-        .user-content p {
-            margin: 10px 0;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .close-user {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #667781;
-        }
-
-        .options-menu {
-            display: none;
-            position: absolute;
-            right: 20px;
-            top: 60px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            z-index: 100;
-        }
-
-        .options-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .options-menu a:hover {
-            background: #f0f2f5;
-        }
-
-        .loader {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loader::after {
-            content: '';
-            width: 40px;
-            height: 40px;
-            border: 4px solid #E53935;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        .shared-profile-card {
+/* Header */
+.chat-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #fafafa;
+    padding: 15px 20px;
+    background: #0084ff;
+    color: #fff;
+    gap: 15px;
+}
+
+.chat-header img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
     cursor: pointer;
-    transition: background 0.2s;
-    max-width: 220px;
+    border: 2px solid #fff;
 }
 
+.chat-header .user-info {
+    flex: 1;
+}
+
+.chat-header .user-info h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    padding-top: 10px;
+}
+
+.chat-header .options {
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Chat body */
+.chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+}
+
+/* Messages */
+.message {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    word-break: break-word;
+    transition: all 0.2s ease;
+}
+
+.message.sent {
+    background: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+    border-bottom-right-radius: 2px;
+}
+
+.message.received {
+    background: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+}
+
+/* Sender info */
+.sender-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #667781;
+}
+
+.sender-photo, .user-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f2f5;
+}
+
+.user-icon i {
+    font-size: 12px;
+    color: #0084ff;
+}
+
+.sender-name {
+    font-weight: 500;
+    font-size: 12px;
+    color: #0084ff;
+}
+
+/* Message content & time */
+.message-content {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #667781;
+    align-self: flex-end;
+}
+
+/* Delete button */
+.delete-btn {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 14px;
+    color: #ff4444;
+    cursor: pointer;
+}
+
+.message.sent:hover .delete-btn {
+    display: block;
+}
+
+/* File preview */
+.file-preview {
+    margin-top: 6px;
+    max-width: 200px;
+}
+
+.file-preview img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+.file-preview img:hover {
+    transform: scale(1.05);
+}
+.file-preview video {
+    max-width: 200px;
+    border-radius: 10px;
+}
+/* Shared profile cards */
+.shared-profile-card {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    cursor: pointer;
+    gap: 10px;
+    max-width: 250px;
+    transition: all 0.2s ease;
+}
 .shared-profile-card:hover {
-    background: #f0f0f0;
+    background: #f1f1f1;
 }
-
-.shared-profile-avatar {
+.shared-profile-card img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
-
 .shared-profile-info {
+    display: flex;
+    flex-direction: column;
+}
+.shared-profile-info strong {
+    font-size: 14px;
+    color: #333;
+}
+.shared-profile-info span {
+    font-size: 12px;
+    color: #555;
+}
+/* ===== Shared Post Card ===== */
+.shared-post-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 250px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.shared-post-card:hover {
+    background: #f1f1f1;
+}
+.shared-post-card img,
+.shared-post-card video {
+    width: 100%;
+    border-radius: 10px;
+}
+.shared-post-caption {
+    font-size: 13px;
+    color: #333;
+}
+.shared-post-link {
+    font-size: 12px;
+    color: #0084ff;
+    font-weight: 500;
+}
+
+/* Date divider */
+.date-divider {
+    text-align: center;
+    font-size: 12px;
+    color: #667781;
+    margin: 10px 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.8);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Footer */
+.chat-footer {
+    padding: 10px 20px;
+    background: #f0f2f5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #d9d9d9;
+}
+
+.message-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.send-btn, .attach-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #0084ff;
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modals */
+.user-modal {
+    display: none;
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.user-content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    max-width: 400px;
+}
+
+.user-content img {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.user-content p {
+    margin: 10px 0;
     font-size: 14px;
     color: #333;
 }
 
+.close-user {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #667781;
+}
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+/* Options menu */
+.options-menu {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+}
 
-        @media (max-width: 600px) {
-            .chat-container {
-                height: 100vh;
-                border-radius: 0;
-            }
+.options-menu a {
+    display: block;
+    padding: 10px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+}
 
-            .message {
-                max-width: 80%;
-            }
-        }
+.options-menu a:hover {
+    background: #f0f2f5;
+}
+
+/* Loader */
+.loader {
+    display: none;
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loader::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 4px solid #0084ff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+    .chat-container {
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .message {
+        max-width: 80%;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -396,7 +466,9 @@ if ($friendResult->num_rows == 0) {
             <label for="fileInput">
                 <i class="fas fa-paperclip attach-btn"></i>
             </label>
-            <input type="file" id="fileInput" style="display: none;" onchange="previewFile()">
+        <input type="file" id="fileInput" name="file" 
+       accept="image/*,video/*,.pdf,.doc,.docx,.zip" 
+       style="display: none;" onchange="previewFile()">
             <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." autocomplete="off">
             <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
             <div id="filePreview" class="file-preview"></div>
@@ -407,6 +479,7 @@ if ($friendResult->num_rows == 0) {
     <script>
         let isSending = false;
         let isInitialLoad = true;
+        let autoScroll = true;
 
         function sendMessage() {
             if (isSending) return;
@@ -490,45 +563,57 @@ if ($friendResult->num_rows == 0) {
             }
         }
 
-        function loadMessages() {
-            const recipientId = document.getElementById("recipientId").value;
-            const chatBody = document.getElementById("chatBody");
-            const oldScrollHeight = chatBody.scrollHeight;
-            const isScrolledToBottom = chatBody.scrollHeight - chatBody.scrollTop <= chatBody.clientHeight + 5;
+    function previewFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const preview = document.getElementById('filePreview'); // ✅ fixed ID
 
-            $.ajax({
-                url: `../Assets/AjaxPages/ChatLoad.php?id=${recipientId}`,
-                success: (data) => {
-                    const oldScrollTop = chatBody.scrollTop;
-                    $("#chatBody").html(data);
-                    const newScrollHeight = chatBody.scrollHeight;
+    if (!file) {
+        preview.innerHTML = "";
+        return;
+    }
 
-                    if (isInitialLoad || isScrolledToBottom) {
-                        chatBody.scrollTop = newScrollHeight;
-                        isInitialLoad = false;
-                    } else {
-                        chatBody.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
-                    }
-                }
-            });
-        }
+    const fileType = file.type;
+    preview.innerHTML = ""; // clear old preview
 
-        function previewFile() {
-            const file = document.getElementById("fileInput").files[0];
-            const preview = document.getElementById("filePreview");
-            preview.innerHTML = "";
-            if (file) {
-                if (file.type.startsWith('image/')) {
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.className = "file-preview";
-                    img.style.maxWidth = "100px";
-                    preview.appendChild(img);
-                } else {
-                    preview.innerHTML = `<p>Selected: ${file.name}</p>`;
-                }
-            }
-        }
+    if (fileType.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:150px; border-radius:8px;">`;
+        };
+        reader.readAsDataURL(file);
+
+    } else if (fileType.startsWith("video/")) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `
+                <video controls style="max-width:150px; border-radius:8px;">
+                    <source src="${e.target.result}" type="${fileType}">
+                </video>`;
+        };
+        reader.readAsDataURL(file);
+
+    } else if (fileType === "application/pdf") {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📕 PDF Selected: ${file.name}
+                             </div>`;
+
+    } else if (fileType.includes("msword") || fileType.includes("officedocument")) {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📘 Document Selected: ${file.name}
+                             </div>`;
+
+    } else if (fileType === "application/zip" || fileType === "application/x-zip-compressed") {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📦 ZIP File Selected: ${file.name}
+                             </div>`;
+
+    } else {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📁 File Selected: ${file.name}
+                             </div>`;
+    }
+}
 
         function toggleOptions() {
             const menu = document.getElementById("optionsMenu");
@@ -544,16 +629,56 @@ if ($friendResult->num_rows == 0) {
         }
 
         // Auto-load messages
-        loadMessages();
-        setInterval(loadMessages, 1000);
+loadMessages();
+setInterval(loadMessages, 1000);
 
-        // Close options menu when clicking outside
-        document.addEventListener("click", (e) => {
-            const optionsMenu = document.getElementById("optionsMenu");
-            if (!e.target.closest(".options") && !e.target.closest(".options-menu")) {
-                optionsMenu.style.display = "none";
+// Close options menu when clicking outside
+document.addEventListener("click", (e) => {
+    const optionsMenu = document.getElementById("optionsMenu");
+    if (!e.target.closest(".options") && !e.target.closest(".options-menu")) {
+        optionsMenu.style.display = "none";
+    }
+});
+
+// ✅ Track user scroll to control auto-scroll
+const chatBody = document.getElementById("chatBody");
+chatBody.addEventListener("scroll", () => {
+    autoScroll = chatBody.scrollTop + chatBody.clientHeight >= chatBody.scrollHeight - 50;
+});
+
+function loadMessages() {
+    const chatBody = document.getElementById("chatBody");
+    const recipientId = document.getElementById("recipientId").value;
+
+    fetch(`../Assets/AjaxPages/ChatLoad.php?id=${recipientId}`)
+        .then(response => response.text())
+        .then(data => {
+            // If content hasn't changed, do nothing
+            if (chatBody.dataset.lastData === data) return;
+
+            // Save new version
+            chatBody.dataset.lastData = data;
+
+            // Save scroll info before update
+            const oldScrollTop = chatBody.scrollTop;
+            const oldScrollHeight = chatBody.scrollHeight;
+
+            chatBody.innerHTML = data;
+
+            const newScrollHeight = chatBody.scrollHeight;
+
+            if (autoScroll) {
+                // Stick to bottom if user was already at bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } else {
+                // Restore previous position while new messages load
+                chatBody.scrollTop = oldScrollTop + (chatBody.scrollHeight - oldScrollHeight);
             }
-        });
+        })
+        .catch(err => console.error("Load messages failed:", err));
+}
+
+
     </script>
 </body>
 </html>

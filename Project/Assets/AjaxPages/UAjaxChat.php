@@ -37,9 +37,14 @@ $uid = $_POST['uid'];
 $filePath = '';
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    $allowedTypes = array_merge($allowedTypes, ['image/jpg', 'image/pjpeg', 'image/x-png', 'application/x-zip-compressed', 'application/zip']);
-    $maxFileSize = 5 * 1024 * 1024; // 5MB
+    $allowedTypes = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/jpg', 'image/pjpeg', 'image/x-png',
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/x-zip-compressed', 'application/zip',
+    'video/mp4', 'video/webm', 'video/ogg'
+];
+$maxFileSize = 50 * 1024 * 1024; // 50MB
+
     $fileType = $_FILES['file']['type'];
     $fileSize = $_FILES['file']['size'];
 
