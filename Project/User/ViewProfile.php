@@ -1,15 +1,50 @@
 <?php
 include '../Assets/Connection/Connection.php';
 session_start();
-$loggedInUid = $_SESSION['uid'];     // logged-in user
-$profileId = $_GET['pid'];           // whose profile we are viewing
 
 if (!isset($_SESSION["uid"])) {
     header("Location: login.php");
     exit;
 }
 
-$uid = mysqli_real_escape_string($con, $_SESSION['uid']);
+$loggedInUid = $_SESSION['uid'];     // logged-in user
+$profileId   = intval($_GET['pid'] ?? 0); // profile being viewed
+
+// ✅ Friends of logged-in user
+$loggedInFriends = [];
+$friendQuery = "
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    WHERE u.user_id IN (
+        SELECT user_from_id FROM tbl_friends 
+        WHERE user_to_id = '$loggedInUid' AND friends_status = 1
+        UNION
+        SELECT user_to_id FROM tbl_friends 
+        WHERE user_from_id = '$loggedInUid' AND friends_status = 1
+    )
+    AND u.user_id != '$loggedInUid'
+    ORDER BY u.user_name ASC
+";
+$friendResult = $con->query($friendQuery);
+if ($friendResult) {
+    $loggedInFriends = $friendResult->fetch_all(MYSQLI_ASSOC);
+}
+
+// ✅ Groups of logged-in user (created OR joined)
+$loggedInGroups = [];
+$groupRes = $con->query("
+    SELECT DISTINCT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm ON g.group_id = gm.group_id
+    WHERE g.user_id = '$loggedInUid' 
+       OR (gm.user_id = '$loggedInUid' AND gm.groupmembers_status = 1)
+    ORDER BY g.group_name ASC
+");
+if ($groupRes) {
+    $loggedInGroups = $groupRes->fetch_all(MYSQLI_ASSOC);
+}
+
+$uid = $loggedInUid; 
 $message = "";
 
 // Handle Follow (send request)
@@ -47,9 +82,13 @@ if (isset($_GET['ufid'])) {
     exit;
 }
 
-
 // Determine which profile to display: the one from URL ('pid') or the logged-in user's
-$pid = isset($_GET['pid']) && !empty($_GET['pid']) ? mysqli_real_escape_string($con, $_GET['pid']) : $uid;
+// Standardize on $profileId (safe int), default to logged-in if not set/valid
+$profileId = isset($_GET['pid']) ? intval($_GET['pid']) : $loggedInUid;
+if ($profileId <= 0) {
+    header("Location: ../Guest/Login.php"); // Invalid ID, redirect
+    exit;
+}
 
 // Fetch profile data
 $selQry = "SELECT u.*, p.place_name, d.district_name,
@@ -70,18 +109,18 @@ $data = $res->fetch_assoc();
 
 
 // Get counts for Posts and Friends
-$postCountQry = "SELECT COUNT(*) as post_count FROM tbl_post WHERE user_id = '$pid'";
+$postCountQry = "SELECT COUNT(*) as post_count FROM tbl_post WHERE user_id = '$profileId'";
 $postCountRes = $con->query($postCountQry);
 $postCount = $postCountRes->fetch_assoc()['post_count'];
 
-$friendCountQry = "SELECT COUNT(*) as friend_count FROM tbl_friends WHERE (user_from_id = '$pid' OR user_to_id = '$pid') AND friends_status = 1";
+$friendCountQry = "SELECT COUNT(*) as friend_count FROM tbl_friends WHERE (user_from_id = '$profileId' OR user_to_id = '$profileId') AND friends_status = 1";
 $friendCountRes = $con->query($friendCountQry);
 $friendCount = $friendCountRes->fetch_assoc()['friend_count'];
 
 
 // Determine friendship status to show correct button
 $friend_status = null;
-$selFriendQry = "SELECT friends_status FROM tbl_friends WHERE (user_from_id = '$uid' AND user_to_id = '$pid') OR (user_from_id = '$pid' AND user_to_id = '$uid')";
+$selFriendQry = "SELECT friends_status FROM tbl_friends WHERE (user_from_id = '$uid' AND user_to_id = '$profileId') OR (user_from_id = '$profileId' AND user_to_id = '$uid')";
 $resFriend = $con->query($selFriendQry);
 if($resFriend->num_rows > 0){
     $dataFriend = $resFriend->fetch_assoc();
@@ -234,11 +273,11 @@ if($resFriend->num_rows > 0){
         .pending-btn, .edit-btn { background-color: var(--gray-medium); }
         .pending-btn:hover, .edit-btn:hover { background-color: var(--gray-light); }
         
-        .share-btn {
+        .profile-share-btn {
             background-color: transparent;
             border: 1px solid var(--border-color);
         }
-        .share-btn:hover { background-color: var(--gray-medium); }
+        .profile-share-btn:hover { background-color: var(--gray-medium); }
 
         /* Posts Container */
         .posts-content {
@@ -350,29 +389,28 @@ if($resFriend->num_rows > 0){
                         <div class="stat-count"><?php echo $postCount ?></div>
                         <div class="stat-label">Posts</div>
                     </div>
-                    <div class="profile-stat" onclick="window.location='FriendsList.php?user_id=<?php echo $pid ?>'">
+                    <div class="profile-stat" onclick="window.location='FriendsList.php?user_id=<?php echo $profileId ?>'">
                         <div class="stat-count"><?php echo $friendCount ?></div>
                         <div class="stat-label">Friends</div>
                     </div>
                 </div>
                 
                 <div class="profile-actions">
-                    <?php if ($pid != $uid): ?>
+                    <?php if ($profileId != $uid): ?>
                         <?php if ($friend_status === '1'): ?>
-                            <a href="ViewProfile.php?ufid=<?php echo $pid; ?>" class="profile-btn unfollow-btn">Unfollow</a>
+                            <a href="ViewProfile.php?ufid=<?php echo $profileId; ?>" class="profile-btn unfollow-btn">Unfollow</a>
                         <?php elseif ($friend_status === '0'): ?>
                             <button class="profile-btn pending-btn" disabled>Request Sent</button>
-                             <a href="ViewProfile.php?ufid=<?php echo $pid; ?>" class="profile-btn unfollow-btn" style="background-color:#5c2e2e">cancel Request</a>
+                             <a href="ViewProfile.php?ufid=<?php echo $profileId; ?>" class="profile-btn unfollow-btn" style="background-color:#5c2e2e">cancel Request</a>
                         <?php else: ?>
-                            <a href="ViewProfile.php?fid=<?php echo $pid; ?>" class="profile-btn follow-btn">Follow</a>
+                            <a href="ViewProfile.php?fid=<?php echo $profileId; ?>" class="profile-btn follow-btn">Follow</a>
                         <?php endif; ?>
                     <?php else: ?>
                         <a href="EditProfile.php" class="profile-btn edit-btn">Edit Profile</a>
                     <?php endif; ?>
-
-                    <button class="profile-btn share-btn" onclick="shareProfile()">
-                        <i class="fas fa-share-alt"></i> Share Profile
-                    </button>
+<button type="button" class="profile-btn profile-share-btn" onclick="document.getElementById('profileShareModal').style.display='block'">
+    <i class="fas fa-share-alt"></i> Share Profile
+</button>
                 </div>
                 
                 <?php if (!empty($message)): ?>
@@ -388,14 +426,12 @@ if($resFriend->num_rows > 0){
             <div class="posts-container">
                 <?php
                 if ($postCount > 0) {
-                    $original_uid = $_SESSION['uid'];
-                    $_SESSION['uid'] = $pid; // Temporarily set session to the profile being viewed
-                    include 'ViewPost.php'; // This file should handle fetching and displaying posts
-                    $_SESSION['uid'] = $original_uid; // Restore original user ID
+                    $profileUserId = $profileId;
+                    include 'ViewPost.php'; // This file should handle fetching 
                 } else {
                     echo '<div class="no-posts">';
                     echo '<i class="far fa-images"></i>';
-                    if ($pid == $uid) {
+                    if ($profileId == $uid) {
                         echo '<p>You haven\'t shared any posts yet.</p>';
                         echo '<a href="Post.php">Create Your First Post</a>';
                     } else {
@@ -407,25 +443,53 @@ if($resFriend->num_rows > 0){
             </div>
         </main>
     </div>
-    <script>
-        function shareProfile() {
-            const profileUrl = window.location.origin + window.location.pathname + '?pid=<?php echo $pid; ?>';
-            const profileTitle = '<?php echo htmlspecialchars($data['user_name'], ENT_QUOTES); ?>\'s Profile on Nexo';
+    
+   <!-- Share Profile Modal -->
+<div id="profileShareModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+    <div style="background-color:var(--gray-dark); margin:10% auto; padding:20px; border:1px solid var(--border-color); border-radius:12px; width:80%; max-width:500px;">
+        <h3>Share <?php echo htmlspecialchars($data['user_name']); ?>'s Profile</h3>
+        <form action="ShareProfile.php" method="POST">
+            <input type="hidden" name="profile_id" value="<?php echo $profileId; ?>">
+            <!-- Friends -->
+            <div>
+                <h4>Your Friends</h4>
+                <!-- DEBUG: Log friends array state -->
+                <?php echo "<!-- DEBUG: Modal loggedInFriends count: " . count($loggedInFriends) . ", content: " . print_r($loggedInFriends, true) . " -->"; ?>
+                <?php if (is_array($loggedInFriends) && count($loggedInFriends) > 0): ?>
+                    <?php foreach ($loggedInFriends as $friend): ?>
+                        <label style="display:block; padding:5px 0;">
+                            <input type="checkbox" name="friends[]" value="<?php echo htmlspecialchars($friend['user_id']); ?>">
+                            <?php echo htmlspecialchars($friend['user_name']); ?>
+                        </label>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>You don't have any friends yet.</p>
+                <?php endif; ?>
+            </div>
+            <!-- Groups -->
+            <div style="margin-top:20px;">
+                <h4>Your Groups</h4>
+                <!-- DEBUG: Log groups array state -->
+                <?php echo "<!-- DEBUG: Modal loggedInGroups count: " . count($loggedInGroups) . ", content: " . print_r($loggedInGroups, true) . " -->"; ?>
+                <?php if (is_array($loggedInGroups) && count($loggedInGroups) > 0): ?>
+                    <?php foreach ($loggedInGroups as $group): ?>
+                        <label style="display:block; padding:5px 0;">
+                            <input type="checkbox" name="groups[]" value="<?php echo htmlspecialchars($group['group_id']); ?>">
+                            <?php echo htmlspecialchars($group['group_name']); ?>
+                        </label>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>You don't have any groups yet.</p>
+                <?php endif; ?>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+                <button type="submit" class="profile-btn follow-btn">Share</button>
+                <button type="button" class="profile-btn unfollow-btn" onclick="document.getElementById('profileShareModal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-            if (navigator.share) {
-                navigator.share({
-                    title: profileTitle,
-                    url: profileUrl
-                }).catch(console.error);
-            } else {
-                navigator.clipboard.writeText(profileUrl).then(() => {
-                    alert('Profile link copied to clipboard!');
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                    alert('Failed to copy link.');
-                });
-            }
-        }
-    </script>
+
 </body>
 </html>

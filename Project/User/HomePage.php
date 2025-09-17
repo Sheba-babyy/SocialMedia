@@ -14,10 +14,35 @@ $datauser=$rowuser->fetch_assoc();
 $uid = mysqli_real_escape_string($con, $_SESSION['uid']);
 $uname = $_SESSION['uname'];
 
+// Get user friends for sharing
+$friends_result = $con->query("
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    INNER JOIN tbl_friends f 
+        ON (f.user_from_id = u.user_id OR f.user_to_id = u.user_id)
+    WHERE f.friends_status = '1' 
+        AND '$uid' IN (f.user_from_id, f.user_to_id)
+        AND u.user_id != '$uid'
+    ORDER BY u.user_name ASC
+");
+$friends = $friends_result->fetch_all(MYSQLI_ASSOC);
+
+// Get groups the user has joined for sharing
+$groups_result = $con->query("
+    SELECT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm 
+        ON g.group_id = gm.group_id AND gm.user_id = '$uid' AND gm.groupmembers_status = 1
+    WHERE g.user_id = '$uid' OR gm.user_id = '$uid'
+");
+$groups = $groups_result->fetch_all(MYSQLI_ASSOC);
+
+
 // Get posts for the feed
 $post_sql = "SELECT p.*, u.user_name, u.user_photo,u.user_id,
              (SELECT COUNT(like_id) FROM tbl_like l WHERE l.post_id = p.post_id) AS like_count,
-             (SELECT COUNT(like_id) FROM tbl_like l WHERE l.post_id = p.post_id AND l.user_id = '$uid') AS user_liked
+             (SELECT COUNT(like_id) FROM tbl_like l WHERE l.post_id = p.post_id AND l.user_id = '$uid') AS user_liked,
+             (SELECT COUNT(comment_id) FROM tbl_comment c WHERE c.post_id = p.post_id) AS comment_count
              FROM tbl_post p 
              INNER JOIN tbl_user u ON p.user_id = u.user_id 
              ORDER BY p.post_date DESC";
@@ -188,7 +213,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             background-color: var(--black);
             margin: 10% auto;
             padding: 0;
-            border: 1px solid var(--deep-forest-green);
+            border: 1px solid var(--white);
             width: 90%;
             max-width: 500px;
             border-radius: 8px;
@@ -329,7 +354,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             right: 0;
             top: 100%;
             background-color: var(--black);
-            border: 1px solid var(--deep-forest-green);
+            border: 1px solid var(--white);
             border-radius: 8px;
             min-width: 180px;
             z-index: 100;
@@ -380,7 +405,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             background-color: var(--black);
             margin: 10% auto;
             padding: 0;
-            border: 1px solid var(--deep-forest-green);
+            border: 1px solid var(--white);
             width: 90%;
             max-width: 500px;
             border-radius: 8px;
@@ -433,12 +458,12 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             width: 100%;
             border-radius: 8px;
             margin-top: 10px;
-            border: 1px solid var(--deep-forest-green);
+            border: 1px solid var(--white);
         }
 
         .post-actions {
             display: flex;
-            border-top: 1px solid var(--deep-forest-green);
+            border-top: 1px solid var(--white);
             padding-top: 10px;
         }
 
@@ -476,7 +501,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             padding: 10px;
             border-radius: 20px;
             background-color: var(--black);
-            border: 1px solid var(--deep-forest-green);
+            border: 1px solid var(--white);
             color: var(--white);
             text-decoration: none;
             transition: background-color 0.3s;
@@ -515,7 +540,7 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
         <!-- Left Sidebar -->
         <div class="left-sidebar">
             <div class="welcome-card">
-                <h2>Welcome,
+                <h2>Welcome
                     <?php echo htmlspecialchars($uname) ?>
                 </h2>
                 <p>What would you like to do today?</p>
@@ -666,12 +691,11 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                     </div>
                     <a href="Comment.php?cid=<?php echo $post_id ?>" class="post-action">
                         <i class="far fa-comment"></i>
-                        <span>Comment</span>
+                        <span> <?php echo $post['comment_count'] ?> </span>
                     </a>
-                    <div class="post-action share-btn" data-post-id="<?php echo $post_id ?>">
-                        <i class="fas fa-share"></i>
-                        <span>Share</span>
-                    </div>
+                    <a href="#" class="post-action share-btn" data-post-id="<?php echo $post_id ?>">
+                    <i class="fas fa-share"></i> <span>Share</span>
+                    </a>
                 </div>
             </div>
             <?php } ?>
@@ -777,6 +801,41 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
             </div>
         </div>
     </div>
+
+    <!-- share modal -->
+    <div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Share Post</h2>
+            <span class="close-modal" id="closeShareModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="shareForm">
+                <input type="hidden" name="original_post_id" id="share_post_id" value="">
+
+                <!-- Friends -->
+                <label>Select Friends:</label>
+                <select name="friends[]" multiple id="share_friends" style="width:100%;padding:5px;">
+                    <?php if(!empty($friends)){ foreach($friends as $f){ ?>
+                        <option value="<?= $f['user_id'] ?>"><?= htmlspecialchars($f['user_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <!-- Groups -->
+                <label>Select Groups:</label>
+                <select name="groups[]" multiple id="share_groups" style="width:100%;padding:5px;">
+                    <?php if(!empty($groups)){ foreach($groups as $g){ ?>
+                        <option value="<?= $g['group_id'] ?>"><?= htmlspecialchars($g['group_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <button type="submit" style="background:var(--deep-forest-green);color:white;padding:8px 15px;border:none;border-radius:4px;">Share</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
    <?php include("Footer.php");  ?>
 
     <script src="../Assets/JQ/JQuery.js"></script>
@@ -890,24 +949,40 @@ $group_suggestion_result = $con->query($group_suggestion_sql);
                 }
             });
         });
-        // Share functionality
-        $(document).on('click', '.share-btn', function () {
-            const postId = $(this).data('post-id');
-            const postUrl = window.location.origin + '/Comment.php?cid=' + postId;
+        
+        // Open modal when clicking share button
+$(document).on('click', '.share-btn', function(e){
+    e.preventDefault();
+    var postId = $(this).data('post-id');
+    $('#share_post_id').val(postId); // set hidden input
+    $('#shareModal').show();
+});
 
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Check out this post',
-                    url: postUrl
-                }).catch(console.error);
-            } else {
-                // Fallback for browsers that don't support Web Share API
-                navigator.clipboard.writeText(postUrl).then(() => {
-                    alert('Post link copied to clipboard!');
-                });
-            }
-        });
-    </script>
+// Close modal
+$('#closeShareModal').click(function(){
+    $('#shareModal').hide();
+});
+
+// Close when clicking outside
+$(window).click(function(e){
+    if ($(e.target).is('#shareModal')) {
+        $('#shareModal').hide();
+    }
+});
+
+// AJAX form submission
+$('#shareForm').submit(function(e){
+    e.preventDefault();
+    var formData = new FormData(this);
+    fetch('SharePost.php', { method:'POST', body: formData })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        $('#shareModal').hide();
+    });
+});
+
+</script>
 </body>
 
 </html>

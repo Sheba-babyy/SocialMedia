@@ -323,6 +323,35 @@ if ($friendResult->num_rows == 0) {
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+        .shared-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: background 0.2s;
+    max-width: 220px;
+}
+
+.shared-profile-card:hover {
+    background: #f0f0f0;
+}
+
+.shared-profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.shared-profile-info {
+    font-size: 14px;
+    color: #333;
+}
+
 
         @keyframes spin {
             to { transform: rotate(360deg); }

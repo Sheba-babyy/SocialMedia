@@ -179,6 +179,14 @@ foreach($complaintsMonths as $m){
                 ?>
             </ul>
         </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#0f172a] text-gray-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 text-center">
+        <p class="text-sm">&copy; <?= date("Y") ?> Nexo. All rights reserved.</p>
+    </div>
+    </footer>
+
     </div>
 
     <script>
@@ -255,5 +263,5 @@ foreach($complaintsMonths as $m){
             dateElement.textContent = new Date().toLocaleDateString('en-US', options);
         });
     </script>
-</body>
+    </body>
 </html>

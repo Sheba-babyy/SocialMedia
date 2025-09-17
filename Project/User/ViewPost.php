@@ -1,7 +1,33 @@
 <?php
 include '../Assets/Connection/Connection.php';
 
-$uid = mysqli_real_escape_string($con, $_SESSION['uid']);
+// If a profile user ID was passed, use that. Otherwise, fallback to logged-in user.
+$uid = isset($profileUserId) ? $profileUserId : $_SESSION['uid'];
+
+$loggedInUid = $_SESSION['uid'];
+
+// Get user friends for sharing (always logged-in user)
+$friends_result = $con->query("
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    INNER JOIN tbl_friends f 
+        ON (f.user_from_id = u.user_id OR f.user_to_id = u.user_id)
+    WHERE f.friends_status = '1' 
+        AND '$loggedInUid' IN (f.user_from_id, f.user_to_id)
+        AND u.user_id != '$loggedInUid'
+    ORDER BY u.user_name ASC
+");
+$friends = $friends_result->fetch_all(MYSQLI_ASSOC);
+
+// Get groups the user has joined for sharing
+$groups_result = $con->query("
+    SELECT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm 
+        ON g.group_id = gm.group_id AND gm.user_id = '$loggedInUid' AND gm.groupmembers_status = 1
+    WHERE g.user_id = '$loggedInUid' OR gm.user_id = '$loggedInUid'
+");
+$groups = $groups_result->fetch_all(MYSQLI_ASSOC);
 
 $sql = "SELECT p.*, u.user_name, u.user_photo,u.user_id,
              (SELECT COUNT(like_id) FROM tbl_like l WHERE l.post_id = p.post_id) AS like_count,
@@ -468,10 +494,9 @@ if (isset($_POST['delete_post'])) {
                     <i class="far fa-comment"></i>
                     <span><?php echo $row['comment_count'] ?></span>
                 </a>
-                <button class="post-action share-btn" data-post-id="<?php echo $post_id ?>">
-                    <i class="fas fa-share"></i>
-                    <span>Share</span>
-                </button>
+                <a href="#" class="post-action share-btn" data-post-id="<?php echo $post_id ?>">
+                    <i class="fas fa-share"></i> <span>Share</span>
+                </a>
             </div>
         </div>
         <?php } ?>
@@ -514,6 +539,40 @@ if (isset($_POST['delete_post'])) {
         </div>
     </div>
 
+    <!-- share modal -->
+    <div id="postShareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Share Post</h2>
+            <span class="close-modal" id="closePostShareModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="shareForm">
+                <input type="hidden" name="original_post_id" id="share_post_id" value="">
+
+                <!-- Friends -->
+                <label>Select Friends:</label>
+                <select name="friends[]" multiple id="share_friends" style="width:100%;padding:5px;">
+                    <?php if(!empty($friends)){ foreach($friends as $f){ ?>
+                        <option value="<?= $f['user_id'] ?>"><?= htmlspecialchars($f['user_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <!-- Groups -->
+                <label>Select Groups:</label>
+                <select name="groups[]" multiple id="share_groups" style="width:100%;padding:5px;">
+                    <?php if(!empty($groups)){ foreach($groups as $g){ ?>
+                        <option value="<?= $g['group_id'] ?>"><?= htmlspecialchars($g['group_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <button type="submit" style="background:var(--deep-forest);color:white;padding:8px 15px;border:none;border-radius:4px;">Share</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <script src="../Assets/JQ/JQuery.js"></script>
 <script>
 $(document).ready(function() {
@@ -546,23 +605,6 @@ $(document).ready(function() {
                 console.error('AJAX Error:', status, error);
             }
         });
-    });
-
-    // Share functionality
-    $(document).on('click', '.share-btn', function() {
-        const postId = $(this).data('post-id');
-        const postUrl = window.location.origin + window.location.pathname.replace('view-post-like.php', '') + 'Comment.php?cid=' + postId;
-        
-        if (navigator.share) {
-            navigator.share({
-                title: 'Check out this post',
-                url: postUrl
-            }).catch(console.error);
-        } else {
-            navigator.clipboard.writeText(postUrl).then(() => {
-                alert('Link copied to clipboard!');
-            });
-        }
     });
 
     // Post options menu toggle
@@ -627,6 +669,38 @@ $(document).ready(function() {
                 alert('An error occurred. Please try again.');
             }
         });
+    });
+});
+
+// Open modal when clicking share button
+$(document).on('click', '.share-btn', function(e){
+    e.preventDefault();
+    var postId = $(this).data('post-id');
+    $('#share_post_id').val(postId); // set hidden input
+    $('#postShareModal').show();
+});
+
+// Close modal
+$('#closePostShareModal').click(function(){
+    $('#postShareModal').hide();
+});
+
+// Close when clicking outside
+$(window).click(function(e){
+    if ($(e.target).is('#postShareModal')) {
+        $('#postShareModal').hide();
+    }
+});
+
+// AJAX form submission
+$('#shareForm').submit(function(e){
+    e.preventDefault();
+    var formData = new FormData(this);
+    fetch('SharePost.php', { method:'POST', body: formData })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        $('#shareModal').hide();
     });
 });
 </script>

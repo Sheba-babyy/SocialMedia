@@ -7,12 +7,11 @@ $selQry = "SELECT c.*,
                   uf.user_photo AS from_user_photo,
                   ut.user_name AS to_user_name,
                   ut.user_photo AS to_user_photo
-                 
            FROM tbl_chat c 
            INNER JOIN tbl_user uf ON uf.user_id = c.user_from_id
            INNER JOIN tbl_user ut ON ut.user_id = c.user_to_id
            WHERE (c.user_from_id = '" . $_SESSION["uid"] . "' OR c.user_to_id = '" . $_SESSION["uid"] . "') 
-           AND (c.user_from_id = '" . $_GET["id"] . "' OR c.user_to_id = '" . $_GET["id"] . "') 
+             AND (c.user_from_id = '" . $_GET["id"] . "' OR c.user_to_id = '" . $_GET["id"] . "') 
            ORDER BY c.chat_datetime";
 $result = $con->query($selQry);
 $currentDate = '';
@@ -26,9 +25,29 @@ while ($data = $result->fetch_assoc()) {
     
     $isSent = $data["user_from_id"] == $_SESSION["uid"];
     $messageClass = $isSent ? "sent" : "received";
-?>
+    ?>
     <div class="message <?php echo $messageClass ?>" data-chat-id="<?php echo $data['chat_id'] ?>">
-        <?php if ($data["chat_file"]) { ?>
+        <?php 
+        // ✅ CASE 1: Profile Share
+        if (!empty($data["chat_file"]) && strpos($data["chat_file"], "profile_") === 0) {
+            $profile_id = intval(str_replace("profile_", "", $data["chat_file"]));
+            $profileRes = $con->query("SELECT user_name, user_photo FROM tbl_user WHERE user_id = $profile_id");
+            if ($profileRes && $profileRes->num_rows > 0) {
+                $profile = $profileRes->fetch_assoc();
+                ?>
+                <div class="shared-profile-card" onclick="window.location='../User/ViewProfile.php?pid=<?php echo $profile_id ?>'">
+                    <img src="../Assets/Files/UserDocs/<?php echo htmlspecialchars($profile['user_photo'] ?: 'default.avif') ?>" 
+                         class="shared-profile-avatar">
+                    <div class="shared-profile-info">
+                        <strong><?php echo htmlspecialchars($profile['user_name']) ?></strong><br>
+                        View Profile
+                    </div>
+                </div>
+                <?php
+            }
+        }
+        // ✅ CASE 2: Normal File (image/doc)
+        else if (!empty($data["chat_file"])) { ?>
             <div class="file-preview">
                 <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["chat_file"])) { ?>
                     <img src="../Assets/Files/Chat/<?php echo $data["chat_file"]?>" alt="Attachment">
@@ -36,8 +55,13 @@ while ($data = $result->fetch_assoc()) {
                     <a href="../Assets/Files/Chat/<?php echo $data["chat_file"] ?>" target="_blank">Download File</a>
                 <?php } ?>
             </div>
+        <?php } 
+        
+        // ✅ CASE 3: Normal Text
+        if (!empty($data["chat_content"])) { ?>
+            <div class="message-content"><?php echo htmlspecialchars($data["chat_content"]) ?></div>
         <?php } ?>
-        <div class="message-content"><?php echo htmlspecialchars($data["chat_content"]) ?></div>
+        
         <div class="message-time"><?php echo date('h:i A', strtotime($data["chat_datetime"])) ?></div>
         <?php if ($isSent) { ?>
             <span class="delete-btn" onclick="deleteMessage(<?php echo $data['chat_id'] ?>)">
@@ -45,6 +69,6 @@ while ($data = $result->fetch_assoc()) {
             </span>
         <?php } ?>
     </div>
-<?php
+    <?php
 }
 ?>

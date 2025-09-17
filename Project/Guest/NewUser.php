@@ -51,7 +51,9 @@ if(isset($_POST['btn_submit']))
 
     body {
         font-family: 'Montserrat', sans-serif;
-        background-color: var(--dark-bg);
+        /* background-color: var(--dark-bg); */
+        background: url("../../Docs/img/signup.jpg") no-repeat center center fixed;
+        background-size: cover;
         color: var(--text-light);
         display: flex;
         justify-content: center;
@@ -201,7 +203,6 @@ if(isset($_POST['btn_submit']))
         accent-color: var(--accent-red);
     }
 
-    /* Password field styling */
     .password-wrapper {
         position: relative;
         display: flex;
@@ -227,7 +228,7 @@ if(isset($_POST['btn_submit']))
         color: var(--accent-red);
     }
 
-    /* Hide default password reveal icons */
+    /* Hide default password icons */
     input[type="password"]::-ms-reveal,
     input[type="password"]::-ms-clear {
         display: none;
@@ -287,36 +288,6 @@ if(isset($_POST['btn_submit']))
         background-color: rgba(255, 255, 255, 0.1);
     }
     
-    .terms {
-        margin-top: 20px;
-        font-size: 12px;
-        color: var(--text-subtle);
-        text-align: center;
-    }
-    
-    .terms a {
-        color: var(--text-light);
-        text-decoration: underline;
-        transition: color 0.2s;
-    }
-    
-    .terms a:hover {
-        color: var(--accent-red);
-    }
-    
-    .help-link {
-        display: block;
-        margin-top: 20px;
-        color: var(--text-light);
-        text-decoration: underline;
-        font-size: 14px;
-        text-align: center;
-        transition: color 0.2s;
-    }
-    
-    .help-link:hover {
-        color: var(--accent-red);
-    }
 </style>
 </head>
 
@@ -420,13 +391,6 @@ if(isset($_POST['btn_submit']))
             <input type="reset" class="btn btn-secondary" name="btn_cancel" id="cancel" value="Cancel" />
         </div>
         
-        <div class="terms">
-            <input type="checkbox" id="terms" name="terms" required/>
-            <label for="terms">I agree to be bound by the Nexo <a href="#">Terms of Service</a></label>
-            <p>See our <a href="#">Privacy Policy</a> for more information</p>
-        </div>
-        
-        <a href="#" class="help-link">Need help?</a>
     </form>
 </div>
 
@@ -470,12 +434,6 @@ function validateForm() {
         document.getElementById("txt_repassword").focus();
         return false;
     }
-    
-    if (!document.getElementById('terms').checked) {
-        alert("You must agree to the Terms of Service");
-        return false;
-    }
-
     return true;
 }
 

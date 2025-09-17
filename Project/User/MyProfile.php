@@ -11,6 +11,29 @@ if(!isset($_SESSION["uid"])) {
 $uid = $_SESSION["uid"];
 $profile_id = isset($_GET['id']) ? $_GET['id'] : $uid;
 
+// Get user friends for sharing
+$friends_result = $con->query("
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    INNER JOIN tbl_friends f 
+        ON (f.user_from_id = u.user_id OR f.user_to_id = u.user_id)
+    WHERE f.friends_status = '1' 
+        AND '$uid' IN (f.user_from_id, f.user_to_id)
+        AND u.user_id != '$uid'
+    ORDER BY u.user_name ASC
+");
+$friends = $friends_result->fetch_all(MYSQLI_ASSOC);
+
+// Get groups the user has joined for sharing
+$groups_result = $con->query("
+    SELECT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm 
+        ON g.group_id = gm.group_id AND gm.user_id = '$uid' AND gm.groupmembers_status = 1
+    WHERE g.user_id = '$uid' OR gm.user_id = '$uid'
+");
+$groups = $groups_result->fetch_all(MYSQLI_ASSOC);
+
 // Get profile data
 $profileQry = "SELECT u.*, p.place_name, d.district_name 
               FROM tbl_user u
@@ -386,7 +409,6 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
                         </button>
                     <?php endif; ?>
                     
-                    <!-- Share Profile Button - styled like Edit Profile -->
                     <button class="btn btn-outline btn-block" onclick="shareProfile()">
                         <i class="fas fa-share-alt"></i> Share Profile
                     </button>
@@ -421,6 +443,44 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
         </div>
     </div>
 
+<!-- Share Profile Modal -->
+<div id="shareProfileOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;"></div>
+<div id="shareProfileModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:var(--card-dark);padding:20px;border-radius:12px;z-index:1001;border:1px solid var(--border-dark);">
+    <h3 style="margin-bottom:15px;">Share Profile</h3>
+
+    <form method="post" action="ShareProfile.php">
+        <?php if(!empty($friends)): ?>
+            <div id="shareProfileFriends" style="margin-bottom:15px; max-height:300px; overflow-y:auto;">
+                <h4>Friends</h4>
+                <?php foreach($friends as $f): ?>
+                    <label style="display:flex;align-items:center;margin:5px 0;gap:10px;">
+                        <input type="checkbox" name="friends[]" value="<?= $f['user_id'] ?>">
+                        <span><?= htmlspecialchars($f['user_name']) ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div>No friends found to share with.</div>
+        <?php endif; ?>
+
+        <?php if(!empty($groups)): ?>
+            <div id="shareProfileGroups" style="margin-bottom:15px; max-height:200px; overflow-y:auto;">
+                <h4>Groups</h4>
+                <?php foreach($groups as $g): ?>
+                    <label style="display:flex;align-items:center;margin:5px 0;gap:10px;">
+                        <input type="checkbox" name="groups[]" value="<?= $g['group_id'] ?>">
+                        <span><?= htmlspecialchars($g['group_name']) ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <input type="hidden" name="profile_id" value="<?= intval($profile_id) ?>">
+        <div style="text-align:right;">
+            <button type="submit" style="background-color:var(--forest-green);color:#fff;padding:10px 20px;border-radius:12px;">Share</button>
+        </div>
+    </form>
+</div>
 
     <script src="../Assets/JQ/JQuery.js"></script>
     <script>
@@ -445,21 +505,17 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
             }
         });
     }
-    
-    function shareProfile() {
-        const profileLink = window.location.href;
-        if(navigator.share) {
-            navigator.share({
-                title: '<?=htmlspecialchars($profileData['user_name'])?>\'s Profile',
-                url: profileLink,
-                text: 'Check out this profile on Nexo'
-            }).catch(console.error);
-        } else {
-            navigator.clipboard.writeText(profileLink).then(() => {
-                alert('Profile link copied to clipboard!');
-            });
-        }
-    }
-    </script>
+
+function shareProfile() {
+    document.getElementById('shareProfileOverlay').style.display = 'block';
+    document.getElementById('shareProfileModal').style.display = 'block';
+}
+
+document.getElementById('shareProfileOverlay').addEventListener('click', function() {
+    document.getElementById('shareProfileOverlay').style.display = 'none';
+    document.getElementById('shareProfileModal').style.display = 'none';
+});
+
+</script>
 </body>
 </html>

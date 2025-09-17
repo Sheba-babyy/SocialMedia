@@ -149,7 +149,8 @@ if(isset($_POST['btn_submit'])){
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: var(--dark-bg);
+            background: url("../../Docs/img/forgot.jpg") no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-light);
             margin: 0;
             padding: 0;

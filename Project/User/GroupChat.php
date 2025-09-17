@@ -381,7 +381,40 @@ if ($adminRes && $adminRes->num_rows > 0) {
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
+.shared-profile-card {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #f9f9f9;
+    max-width: 250px;
+    transition: background 0.2s;
+}
+.shared-profile-card:hover {
+    background: #f1f1f1;
+}
+.shared-profile-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+.shared-profile-info {
+    display: flex;
+    flex-direction: column;
+}
+.shared-profile-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+.shared-profile-text {
+    font-size: 12px;
+    color: #555;
+}
         @keyframes spin {
             to { transform: rotate(360deg); }
         }

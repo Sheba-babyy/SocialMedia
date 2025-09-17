@@ -422,7 +422,7 @@ body {
 </div>
 
 <script>
-// ⭐ Rating
+//  Rating
 document.querySelectorAll('.form-star').forEach(star => {
     star.onclick = () => {
         const value = star.dataset.value;
@@ -433,7 +433,7 @@ document.querySelectorAll('.form-star').forEach(star => {
     };
 });
 
-// 👍 Like Feedback (SIMPLE)
+//  Like Feedback 
 function likeFeedback(fid) {
     fetch('../Assets/AjaxPages/FeedbackLike.php', {
         method: 'POST',
@@ -461,7 +461,7 @@ function likeFeedback(fid) {
     .catch(err => console.error(err));
 }
 
-// 💬 Toggle Comments
+//  Toggle Comments
 document.querySelectorAll('.view-comments').forEach(btn => {
     btn.onclick = () => {
         const box = btn.closest('.review-item').querySelector('.comment-box');
@@ -470,7 +470,7 @@ document.querySelectorAll('.view-comments').forEach(btn => {
     };
 });
 
-// 🔄 Load Comments
+// Load Comments
 function loadComments(fid) {
     fetch(`../Assets/AjaxPages/FeedbackComment.php?action=get&feedback_id=${fid}`)
     .then(r => r.json())
@@ -489,7 +489,7 @@ function loadComments(fid) {
     });
 }
 
-// ➕ Add Comment
+//  Add Comment
 function addComment(fid) {
     const input = document.getElementById(`comment-input-${fid}`);
     if (!input.value.trim()) return alert('Please enter a comment');

@@ -43,19 +43,53 @@ while ($data = $result->fetch_assoc()) {
         </div>
     <?php } ?>
 
-        <!-- Show file if exists -->
-        <?php if ($data["groupchat_file"]) { ?>
-            <div class="file-preview">
-                <?php if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["groupchat_file"])) { ?>
-                    <img src="../Assets/Files/Chat/<?php echo $data["groupchat_file"]?>" alt="Attachment">
-                <?php } else { ?>
-                    <a href="../Assets/Files/Chat/<?php echo $data["groupchat_file"] ?>" target="_blank">Download File</a>
-                <?php } ?>
-            </div>
-        <?php } ?>
+        <!-- Message Content -->
+        <div class="message-content">
+        <?php 
+        // 🔹 Case 1: Shared Profile
+        if (!empty($data["groupchat_file"]) && strpos($data["groupchat_file"], "profile_") === 0) {
+            $sharedProfileId = str_replace("profile_", "", $data["groupchat_file"]);
 
-        <!-- Show message content and time -->
-        <div class="message-content"><?php echo htmlspecialchars($data["groupchat_content"]) ?></div>
+            $profileQry = $con->query("SELECT user_name, user_photo FROM tbl_user WHERE user_id='$sharedProfileId'");
+            if ($profileQry && $profileQry->num_rows > 0) {
+                $profileData = $profileQry->fetch_assoc();
+                ?>
+                <div class="shared-profile-card" 
+                     onclick="window.location.href='../User/ViewProfile.php?pid=<?php echo $sharedProfileId ?>'">
+                    <img src="../Assets/Files/UserDocs/<?php echo $profileData['user_photo'] ?: 'default.avif' ?>" 
+                         alt="Profile Photo" class="shared-profile-photo">
+                    <div class="shared-profile-info">
+                        <span class="shared-profile-name"><?php echo htmlspecialchars($profileData['user_name']) ?></span>
+                        <span class="shared-profile-text">View Profile</span>
+                    </div>
+                </div>
+                <?php
+            } else {
+                echo "<i>Profile not found</i>";
+            }
+        }
+
+        // 🔹 Case 2: File upload (image/doc/etc.)
+        elseif (!empty($data["groupchat_file"])) {
+            if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["groupchat_file"])) {
+                echo "<div class='file-preview'>
+                        <img src=\"../Assets/Files/Chat/{$data["groupchat_file"]}\" alt=\"Attachment\">
+                      </div>";
+            } else {
+                echo "<div class='file-preview'>
+                        <a href=\"../Assets/Files/Chat/{$data["groupchat_file"]}\" target=\"_blank\">Download File</a>
+                      </div>";
+            }
+        } 
+
+        // 🔹 Case 3: Normal Text
+        else {
+            echo nl2br(htmlspecialchars($data["groupchat_content"]));
+        }
+        ?>
+        </div>
+
+        <!-- Message time -->
         <div class="message-time"><?php echo date('h:i A', strtotime($data["groupchat_datetime"])) ?></div>
 
         <!-- Add delete button for sent messages -->
@@ -68,3 +102,4 @@ while ($data = $result->fetch_assoc()) {
 <?php
 }
 ?>
+

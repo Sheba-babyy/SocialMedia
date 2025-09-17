@@ -12,10 +12,10 @@ if(isset($_POST['btn_login']))
     $UserRes=$con->query($selUser);
     $UserData=$UserRes->fetch_assoc();
     
-    //verifier login
-    $selVerifier="select * from tbl_verifier where verifier_email='".$email."'";
-    $VerifierRes=$con->query($selVerifier);
-    $VerifierData = $VerifierRes->fetch_assoc();
+    // //verifier login
+    // $selVerifier="select * from tbl_verifier where verifier_email='".$email."'";
+    // $VerifierRes=$con->query($selVerifier);
+    // $VerifierData = $VerifierRes->fetch_assoc();
     
     //admin login
     $selAdmin="select * from tbl_admin where admin_email='".$email."'";
@@ -30,12 +30,12 @@ if(isset($_POST['btn_login']))
         header("location:../User/HomePage.php");
         exit;
     }
-    else if($VerifierData && password_verify($password, $VerifierData['verifier_password']))
-    {
-        $_SESSION['vid'] = $VerifierData['verifier_id'];
-        $_SESSION['vname'] = $VerifierData['verifier_name'];
-        header("location:../Verifier/HomePage.php");
-    }
+    // else if($VerifierData && password_verify($password, $VerifierData['verifier_password']))
+    // {
+    //     $_SESSION['vid'] = $VerifierData['verifier_id'];
+    //     $_SESSION['vname'] = $VerifierData['verifier_name'];
+    //     header("location:../Verifier/HomePage.php");
+    // }
     else if($AdminData && password_verify($password, $AdminData['admin_password']))
     {
         $_SESSION['aid'] = $AdminData['admin_id'];
@@ -63,13 +63,12 @@ if(isset($_POST['btn_login']))
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
-        /* Re-using styles from the first code block for consistency */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500;600;700&display=swap');
         
         :root {
-            --dark-bg: #0A0A0A; /* Deeper, richer black */
-            --card-bg: rgba(255, 255, 255, 0.08); /* More transparent for better blur */
-            --accent-red: #E53935; /* Brighter, more vibrant red */
+            --dark-bg: #0A0A0A; 
+            --card-bg: rgba(255, 255, 255, 0.08); 
+            --accent-red: #E53935; 
             --text-light: #F8F8F8;
             --text-subtle: #AFAFAF;
             --border-color: rgba(255, 255, 255, 0.15);
@@ -83,7 +82,9 @@ if(isset($_POST['btn_login']))
         }
         
         body {
-            background-color: var(--dark-bg);
+           background: url("../../Docs/img/login.png") no-repeat center center fixed;
+            background-size: cover;
+            /* background-color: var(--dark-bg); */
             color: var(--text-light);
             display: flex;
             justify-content: center;
@@ -99,9 +100,10 @@ if(isset($_POST['btn_login']))
         }
 
         .login-container {
-            background-color: var(--card-bg);
+            background: rgba(0,0,0,0.5);
+            /* background-color: var(--card-bg); */
             border: 1px solid var(--border-color);
-            backdrop-filter: blur(15px); /* Stronger blur effect */
+            backdrop-filter: blur(15px); 
             -webkit-backdrop-filter: blur(15px);
             border-radius: 20px;
             padding: 40px;
@@ -160,7 +162,7 @@ if(isset($_POST['btn_login']))
             padding: 12px 15px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            background-color: transparent; /* Make input transparent */
+            background-color: transparent; 
             color: var(--text-light);
             font-size: 16px;
             transition: all 0.3s ease;
@@ -176,7 +178,7 @@ if(isset($_POST['btn_login']))
             position: relative;
         }
         
-        /* Hide browser’s built-in password reveal */
+        /* Hide browser’s built-in password */
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {
             display: none;
@@ -212,7 +214,7 @@ if(isset($_POST['btn_login']))
         }
         
         .forgot-password:hover {
-            color: #ff6347; /* Lighter red on hover */
+            color: #ff6347; 
         }
         
         .btn-login {
@@ -247,7 +249,7 @@ if(isset($_POST['btn_login']))
         }
         
         .signup-link a:hover {
-            color: #ff6347; /* Lighter red on hover */
+            color: #ff6347; 
         }
         
         .animation-container {
@@ -326,7 +328,7 @@ togglePassword.addEventListener('click', () => {
     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordInput.setAttribute('type', type);
 
-    // Switch between eye (hidden) and eye-slash (visible) in OUTLINE style
+    // Switch between eye (hidden) and eye-slash (visible)
     togglePassword.classList.toggle('fa-eye');
     togglePassword.classList.toggle('fa-eye-slash');
 });

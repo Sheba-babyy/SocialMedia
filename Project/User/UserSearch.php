@@ -5,6 +5,45 @@ session_start();
 // logged-in user
 $uid = isset($_SESSION['uid']) ? intval($_SESSION['uid']) : 0;
 
+// Fetch friends & groups for share modal
+if (isset($_GET['fetch_options']) && $_GET['fetch_options'] == 1) {
+    $uid = $_SESSION['uid'];
+
+    // ✅ Fetch only accepted friends
+    $friendsRes = $con->query("
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    INNER JOIN tbl_friends f 
+        ON (f.user_from_id = u.user_id OR f.user_to_id = u.user_id)
+    WHERE f.friends_status = '1' 
+        AND '$uid' IN (f.user_from_id, f.user_to_id)
+        AND u.user_id != '$uid'
+    ORDER BY u.user_name ASC
+");
+    $friends = [];
+    while ($f = $friendsRes->fetch_assoc()) {
+        $friends[] = $f;
+    }
+
+    // ✅ Fetch groups where user is a member
+    $groupsRes = $con->query("
+    SELECT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm 
+        ON g.group_id = gm.group_id AND gm.user_id = '$uid' AND gm.groupmembers_status = 1
+    WHERE g.user_id = '$uid' OR gm.user_id = '$uid'
+");
+
+    $groups = [];
+    while ($g = $groupsRes->fetch_assoc()) {
+        $groups[] = $g;
+    }
+
+    echo json_encode(['friends' => $friends, 'groups' => $groups]);
+    exit; // stop execution only for this request
+}
+
+
 // Toggle like (POST)
 if (isset($_POST['action']) && $_POST['action'] === 'toggle_like') {
     $post_id = intval($_POST['post_id']);
@@ -193,7 +232,7 @@ if (isset($_GET['q'])) {
                     <div class='pa'>
                         <button class='like-btn {$likedClass}' data-post='{$pid}'>❤️ <span class='like-count'>{$likes}</span></button>
                         <button class='comment-btn' data-post='{$pid}'>💬 <span class='comment-count'>{$comments}</span></button>
-                        <button class='share-btn' data-post='{$pid}'>↗️</button>
+                        <a href='#' class='post-action share-btn' data-post-id='{$pid}' style='text-decoration:none'>↗️</a>
                     </div>
                   </div>";
         }
@@ -543,6 +582,18 @@ body {
     </div>
 </div>
 
+<!-- Share Modal -->
+<div id="shareModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;"></div>
+<div id="shareModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:500px;background:var(--dark-card);padding:20px;border-radius:12px;z-index:1001;border:1px solid var(--dark-border);">
+    <h3 style="margin-bottom:15px;">Share Post</h3>
+    <div id="shareFriends" style="margin-bottom:15px;">Loading friends...</div>
+    <div id="shareGroups" style="margin-bottom:15px;">Loading groups...</div>
+    <div style="text-align:right;">
+        <button id="btnSharePost" style="background-color:var(--primary);color:#fff;padding:10px 20px;border-radius:12px;">Share</button>
+    </div>
+</div>
+
+
 <script>
 $(function(){
     let timer = null;
@@ -671,6 +722,73 @@ $(function(){
         $('#newComment').val('');
     });
 });
+
+let sharePostId = null;
+
+// Open share modal
+$(document).on('click', '.share-btn', function(e){
+    e.stopPropagation();
+    sharePostId = $(this).data('post-id');
+
+    $('#shareModalOverlay, #shareModal').fadeIn();
+    $('#shareFriends').html('Loading friends...');
+    $('#shareGroups').html('Loading groups...');
+
+    // Fetch friends and groups via AJAX
+    $.get('UserSearch.php', { fetch_options: 1, post_id: sharePostId }, function(resp){
+        try {
+            const data = JSON.parse(resp);
+            // Friends checkboxes
+            if(data.friends.length){
+                let htmlF = '<strong>Friends:</strong><br>';
+                data.friends.forEach(f => {
+                    htmlF += `<label style="display:block;margin:5px 0;"><input type="checkbox" class="shareFriend" value="${f.user_id}"> ${f.user_name}</label>`;
+                });
+                $('#shareFriends').html(htmlF);
+            } else { $('#shareFriends').html('No friends found'); }
+
+            // Groups checkboxes
+            if(data.groups.length){
+                let htmlG = '<strong>Groups:</strong><br>';
+                data.groups.forEach(g => {
+                    htmlG += `<label style="display:block;margin:5px 0;"><input type="checkbox" class="shareGroup" value="${g.group_id}"> ${g.group_name}</label>`;
+                });
+                $('#shareGroups').html(htmlG);
+            } else { $('#shareGroups').html('No groups found'); }
+
+        } catch(err){ console.error(err); $('#shareFriends,#shareGroups').html('Error loading options'); }
+    });
+});
+
+// Share button click
+$('#btnSharePost').on('click', function(){
+    const selectedFriends = [];
+    const selectedGroups = [];
+
+    $('.shareFriend:checked').each(function(){ selectedFriends.push($(this).val()); });
+    $('.shareGroup:checked').each(function(){ selectedGroups.push($(this).val()); });
+
+    if(selectedFriends.length === 0 && selectedGroups.length === 0){
+        alert('Select at least one friend or group');
+        return;
+    }
+
+    $.post('SharePost.php', {
+        original_post_id: sharePostId,
+        friends: selectedFriends,
+        groups: selectedGroups
+    }, function(resp){
+        alert(resp);
+        $('#shareModalOverlay, #shareModal').fadeOut();
+    });
+});
+
+// Close modal
+$('#shareModalOverlay').on('click', function(){
+    $('#shareModalOverlay, #shareModal').fadeOut();
+});
+
+
 </script>
 </body>
 </html>
