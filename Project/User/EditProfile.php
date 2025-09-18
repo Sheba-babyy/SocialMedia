@@ -56,6 +56,7 @@ if(isset($_POST['btn_update']))
     }
     
     .form-container {
+        margin-top:50px;
         background-color: #000000;
         border: 2px solid #013220;
         border-radius: 12px;

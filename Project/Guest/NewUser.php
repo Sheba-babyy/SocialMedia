@@ -52,7 +52,7 @@ if(isset($_POST['btn_submit']))
     body {
         font-family: 'Montserrat', sans-serif;
         /* background-color: var(--dark-bg); */
-        background: url("../../Docs/img/signup.jpg") no-repeat center center fixed;
+        background: url("../../Docs/img/signin.png") no-repeat center center fixed;
         background-size: cover;
         color: var(--text-light);
         display: flex;

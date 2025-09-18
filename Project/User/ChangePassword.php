@@ -82,6 +82,7 @@ if(isset($_POST['btn_change']))
     }
 
     .form-container {
+        margin-top:70px;
         background-color: var(--card-bg);
         border: 1px solid var(--border-color);
         backdrop-filter: blur(15px);
