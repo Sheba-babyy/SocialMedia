@@ -59,12 +59,12 @@ else if (!empty($data["chat_content"]) && strpos($data["chat_content"], "SHARED_
         <div class="shared-post-card" onclick="window.location='ViewSharedPost.php?pid=<?php echo $postId ?>'">
             <?php 
             if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $file)) { ?>
-                <img src="../Assets/Files/Post/<?php echo htmlspecialchars($file) ?>" 
+                <img src="../Assets/Files/PostDocs/<?php echo htmlspecialchars($file) ?>" 
                      class="shared-post-img">
             <?php } elseif (preg_match('/\.(mp4|webm|ogg)$/i', $file)) { 
                 $ext = pathinfo($file, PATHINFO_EXTENSION); ?>
                 <video class="shared-post-video" controls style="max-width:250px; border-radius:8px;">
-                    <source src="../Assets/Files/Post/<?php echo htmlspecialchars($file) ?>" type="video/<?php echo strtolower($ext) ?>">
+                    <source src="../Assets/Files/PostDocs/<?php echo htmlspecialchars($file) ?>" type="video/<?php echo strtolower($ext) ?>">
                     Your browser does not support the video tag.
                 </video>
             <?php } ?>
@@ -77,7 +77,6 @@ else if (!empty($data["chat_content"]) && strpos($data["chat_content"], "SHARED_
         <?php
     }
 }
-
         // ✅ CASE 2: Normal File (image/video/doc)
 else if (!empty($data["chat_file"])) { ?>
     <div class="file-preview">
@@ -100,11 +99,9 @@ else if (!empty($data["chat_file"])) { ?>
         <?php } ?>
     </div>
 <?php }
-
-
         // ✅ CASE 4: Normal Text
         if (!empty($data["chat_content"]) && strpos($data["chat_content"], "SHARED_POST:") !== 0) { ?>
-            <div class="message-content"><?php echo htmlspecialchars($data["chat_content"]) ?></div>
+            <div class="message-content"><?php echo nl2br(htmlspecialchars($data["chat_content"])) ?></div>
         <?php } ?>
 
         <div class="message-time"><?php echo date('h:i A', strtotime($data["chat_datetime"])) ?></div>

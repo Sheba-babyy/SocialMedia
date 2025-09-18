@@ -415,6 +415,35 @@ if ($adminRes && $adminRes->num_rows > 0) {
     font-size: 12px;
     color: #555;
 }
+/* ===== Shared Post Card ===== */
+.shared-post-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 250px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.shared-post-card:hover {
+    background: #f1f1f1;
+}
+.shared-post-card img,
+.shared-post-card video {
+    width: 100%;
+    border-radius: 10px;
+}
+.shared-post-caption {
+    font-size: 13px;
+    color: #333;
+}
+.shared-post-link {
+    font-size: 12px;
+    color: #0084ff;
+    font-weight: 500;
+}
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -471,7 +500,9 @@ if ($adminRes && $adminRes->num_rows > 0) {
             <label for="fileInput">
                 <i class="fas fa-paperclip attach-btn"></i>
             </label>
-            <input type="file" id="fileInput" style="display: none;" onchange="previewFile()">
+        <input type="file" id="fileInput" name="file" 
+       accept="image/*,video/*,.pdf,.doc,.docx,.zip"
+       style="display:none;" onchange="previewFile()">   
             <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." autocomplete="off">
             <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
             <div id="filePreview" class="file-preview"></div>
@@ -565,30 +596,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             }
         }
 
-        function loadMessages() {
-            const groupId = document.getElementById("groupId").value;
-            const chatBody = document.getElementById("chatBody");
-            const oldScrollHeight = chatBody.scrollHeight;
-            const isScrolledToBottom = chatBody.scrollHeight - chatBody.scrollTop <= chatBody.clientHeight + 5;
-
-            $.ajax({
-                url: `../Assets/AjaxPages/GroupChatLoad.php?id=${groupId}`,
-                success: (data) => {
-                    const oldScrollTop = chatBody.scrollTop;
-                    $("#chatBody").html(data);
-                    const newScrollHeight = chatBody.scrollHeight;
-
-                    if (isInitialLoad || isScrolledToBottom) {
-                        chatBody.scrollTop = newScrollHeight;
-                        isInitialLoad = false;
-                    } else {
-                        chatBody.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
-                    }
-                }
-            });
-        }
-
-        function previewFile() {
+            function previewFile() {
             const file = document.getElementById("fileInput").files[0];
             const preview = document.getElementById("filePreview");
             preview.innerHTML = "";
@@ -618,9 +626,49 @@ if ($adminRes && $adminRes->num_rows > 0) {
             document.getElementById("groupModal").style.display = "none";
         }
 
-        // Auto-load messages
-        loadMessages();
-        setInterval(loadMessages, 1000);
+        // ✅ Track user scroll to control auto-scroll
+const chatBody = document.getElementById("chatBody");
+let autoScroll = true;
+
+chatBody.addEventListener("scroll", () => {
+    autoScroll = chatBody.scrollTop + chatBody.clientHeight >= chatBody.scrollHeight - 50;
+});
+
+function loadMessages() {
+    const chatBody = document.getElementById("chatBody");
+    const groupId = document.getElementById("groupId").value;
+
+    fetch(`../Assets/AjaxPages/GroupChatLoad.php?id=${groupId}`)
+        .then(response => response.text())
+        .then(data => {
+            // ✅ If nothing changed, do nothing
+            if (chatBody.dataset.lastData === data) return;
+
+            chatBody.dataset.lastData = data;
+
+            // Save old scroll info
+            const oldScrollTop = chatBody.scrollTop;
+            const oldScrollHeight = chatBody.scrollHeight;
+
+            chatBody.innerHTML = data;
+
+            const newScrollHeight = chatBody.scrollHeight;
+
+            if (autoScroll) {
+                // ✅ Stick to bottom only if user was already there
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } else {
+                // ✅ Keep user at the same place when new messages load
+                chatBody.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+            }
+        })
+        .catch(err => console.error("Load messages failed:", err));
+}
+
+// Auto-load
+loadMessages();
+setInterval(loadMessages, 1000);
+
 
         // Close options menu when clicking outside
         document.addEventListener("click", (e) => {

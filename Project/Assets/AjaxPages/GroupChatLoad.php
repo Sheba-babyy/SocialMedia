@@ -44,7 +44,7 @@ while ($data = $result->fetch_assoc()) {
     <?php } ?>
 
         <!-- Message Content -->
-        <div class="message-content">
+               <div class="message-content">
         <?php 
         // 🔹 Case 1: Shared Profile
         if (!empty($data["groupchat_file"]) && strpos($data["groupchat_file"], "profile_") === 0) {
@@ -69,23 +69,60 @@ while ($data = $result->fetch_assoc()) {
             }
         }
 
-        // 🔹 Case 2: File upload (image/doc/etc.)
-        elseif (!empty($data["groupchat_file"])) {
-            if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $data["groupchat_file"])) {
-                echo "<div class='file-preview'>
-                        <img src=\"../Assets/Files/Chat/{$data["groupchat_file"]}\" alt=\"Attachment\">
-                      </div>";
-            } else {
-                echo "<div class='file-preview'>
-                        <a href=\"../Assets/Files/Chat/{$data["groupchat_file"]}\" target=\"_blank\">Download File</a>
-                      </div>";
-            }
-        } 
+       // 🔹 Case 2: Shared Post in GroupChat
+elseif (!empty($data["groupchat_content"]) && strpos($data["groupchat_content"], "SHARED_POST:") === 0) {
+    $postId = intval(str_replace("SHARED_POST:", "", $data["groupchat_content"]));
+    $postRes = $con->query("SELECT * FROM tbl_post WHERE post_id = $postId");
+    if ($postRes && $postRes->num_rows > 0) {
+        $post = $postRes->fetch_assoc();
+        $file = $post['post_photo']; // may be image or video
+        ?>
+        <div class="shared-post-card" onclick="window.location='ViewSharedPost.php?pid=<?php echo $postId ?>'">
+            <?php 
+            // Only show image preview if it exists
+            if (!empty($file) && preg_match('/\.(jpg|jpeg|png|gif)$/i', $file)) { ?>
+                <img src="/Assets/Files/PostDocs/<?php echo htmlspecialchars($file) ?>" class="shared-post-img">
+            <?php } ?>
+            <div class="shared-post-caption">
+                <?php echo htmlspecialchars($post['post_caption'] ?? '') ?>
+            </div>
+            <div class="shared-post-link">👉 View Original Post</div>
+        </div>
+        <?php
+    } else {
+        echo "<i>Post not found</i>";
+    }
+}
+       // 🔹 Case 3: File upload (image/video/doc/etc.)
+elseif (!empty($data["groupchat_file"])) {
+    $file = $data["groupchat_file"];
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
-        // 🔹 Case 3: Normal Text
-        else {
-            echo nl2br(htmlspecialchars($data["groupchat_content"]));
-        }
+    echo "<div class='file-preview'>";
+    if (in_array($ext, ['jpg','jpeg','png','gif'])) {
+        // ✅ Clickable image with enlarge support
+        echo "<a href='../Assets/Files/GroupChat/$file' target='_blank'>
+                <img src='../Assets/Files/GroupChat/$file' 
+                     alt='Attachment' class='chat-image'>
+              </a>";
+    } elseif (in_array($ext, ['mp4','webm','ogg'])) {
+        // ✅ Playable video
+        echo "<video controls style='max-width:200px; border-radius:8px;'>
+                <source src='../Assets/Files/GroupChat/$file' type='video/$ext'>
+                Your browser does not support the video tag.
+              </video>";
+    } else {
+        // ✅ Other files → download
+        echo "<a href='../Assets/Files/GroupChat/$file' target='_blank'>Download File</a>";
+    }
+    echo "</div>";
+}
+
+// 🔹 Case 4: Normal Text
+elseif (!empty($data["groupchat_content"]) && strpos($data["groupchat_content"], "SHARED_POST:") !== 0) { ?>
+    <div class="message-content"><?php echo nl2br(htmlspecialchars($data["groupchat_content"])) ?></div>
+<?php }
+
         ?>
         </div>
 
