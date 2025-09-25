@@ -290,8 +290,11 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
         display: flex;
         align-items: center;
         margin-bottom: 15px;
+        
     }
-    
+    .create-post-header .btn {
+    margin-left: auto;  /* pushes button to the far right */
+    }
     .create-post-avatar {
         width: 48px;
         height: 48px;
@@ -427,10 +430,11 @@ $friendCount = $con->query($friendCountQry)->fetch_assoc()['count'];
                         <img src="../Assets/Files/UserDocs/<?=htmlspecialchars($profileData['user_photo']?:'default.avif')?>" 
                              class="create-post-avatar" alt="Your profile">
                         <div class="create-post-prompt">What's on your mind?</div>
-                    </div>
-                    <button class="btn btn-accent btn-block">
+                        <button class="btn btn-accent">
                         <i class="fas fa-plus"></i> Create Post
-                    </button>
+                        </button>
+                    </div>
+                    
                 </div>
             <?php endif; ?>
             

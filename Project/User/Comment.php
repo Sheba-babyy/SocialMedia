@@ -15,6 +15,29 @@ if (!$post_id) {
     exit;
 }
 
+// Get user friends for sharing (always logged-in user)
+$friends_result = $con->query("
+    SELECT u.user_id, u.user_name 
+    FROM tbl_user u
+    INNER JOIN tbl_friends f 
+        ON (f.user_from_id = u.user_id OR f.user_to_id = u.user_id)
+    WHERE f.friends_status = '1' 
+        AND '$uid' IN (f.user_from_id, f.user_to_id)
+        AND u.user_id != '$uid'
+    ORDER BY u.user_name ASC
+");
+$friends = $friends_result->fetch_all(MYSQLI_ASSOC);
+
+// Get groups the user has joined for sharing
+$groups_result = $con->query("
+    SELECT g.group_id, g.group_name
+    FROM tbl_group g
+    LEFT JOIN tbl_groupmembers gm 
+        ON g.group_id = gm.group_id AND gm.user_id = '$uid' AND gm.groupmembers_status = 1
+    WHERE g.user_id = '$uid' OR gm.user_id = '$uid'
+");
+$groups = $groups_result->fetch_all(MYSQLI_ASSOC);
+
 // Add comment
 if (isset($_POST['btn_enter'])) {
     $content = mysqli_real_escape_string($con, $_POST['txt_comment']);
@@ -341,6 +364,43 @@ $commentResult = $con->query($selComments);
         font-size: 16px;
         margin: 0;
     }
+    .modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    width: 400px;
+    color: #fff;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    cursor: pointer;
+    font-size: 20px;
+    color: #aaa;
+}
+
+.close-modal:hover {
+    color: white;
+}
 
     @media (max-width: 768px) {
         .container {
@@ -467,10 +527,9 @@ $commentResult = $con->query($selComments);
                     <i class="far fa-comment"></i>
                     <span>Comment</span>
                 </button>
-                <button class="post-action">
-                    <i class="fas fa-share"></i>
-                    <span>Share</span>
-                </button>
+                <a href="#" class="post-action share-btn" data-post-id="<?php echo $post_id ?>">
+                <i class="fas fa-share"></i> <span>Share</span>
+            </a>
             </div>
             
             <form method="post" class="comment-form">
@@ -511,6 +570,40 @@ $commentResult = $con->query($selComments);
         </div>
     </div>
 
+    <!-- share modal -->
+<div id="postShareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Share Post</h2>
+            <span class="close-modal" id="closePostShareModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="shareForm">
+                <input type="hidden" name="original_post_id" id="share_post_id" value="">
+
+                <!-- Friends -->
+                <label>Select Friends:</label>
+                <select name="friends[]" multiple id="share_friends" style="width:100%;padding:5px;">
+                    <?php if(!empty($friends)){ foreach($friends as $f){ ?>
+                        <option value="<?= $f['user_id'] ?>"><?= htmlspecialchars($f['user_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <!-- Groups -->
+                <label>Select Groups:</label>
+                <select name="groups[]" multiple id="share_groups" style="width:100%;padding:5px;">
+                    <?php if(!empty($groups)){ foreach($groups as $g){ ?>
+                        <option value="<?= $g['group_id'] ?>"><?= htmlspecialchars($g['group_name']) ?></option>
+                    <?php }} ?>
+                </select><br><br>
+
+                <button type="submit" style="background:var(--accent-green);color:white;padding:8px 15px;border:none;border-radius:4px;">Share</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
     <script src="../Assets/JQ/JQuery.js"></script>
     <script>
       $(document).on('click', '.like-btn', function() {
@@ -537,6 +630,39 @@ $commentResult = $con->query($selComments);
      })
      .catch(() => alert('Failed to update like'));
 });
-    </script>
+// Open modal when clicking share button
+$(document).on('click', '.share-btn', function(e){
+    e.preventDefault();
+    console.log("Share button clicked ✅"); 
+    var postId = $(this).data('post-id');
+    $('#share_post_id').val(postId); // set hidden input
+    $('#postShareModal').show();
+});
+
+// Close modal
+$('#closePostShareModal').click(function(){
+    $('#postShareModal').hide();
+});
+
+// Close when clicking outside
+$(window).click(function(e){
+    if ($(e.target).is('#postShareModal')) {
+        $('#postShareModal').hide();
+    }
+});
+
+// AJAX form submission
+$('#shareForm').submit(function(e){
+    e.preventDefault();
+    var formData = new FormData(this);
+    fetch('SharePost.php', { method:'POST', body: formData })
+    .then(res => res.text())
+    .then(data => {
+        alert(data);
+        $('#postShareModal').hide(); 
+    });
+});
+
+</script>
 </body>
 </html>

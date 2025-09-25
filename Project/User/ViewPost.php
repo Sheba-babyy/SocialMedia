@@ -61,7 +61,7 @@ if (isset($_POST['delete_post'])) {
     }
 
     // Refresh feed
-    header("Location: Home.php");
+    header("Location: ViewPost.php");
     exit;
 }
 
@@ -540,7 +540,7 @@ if (isset($_POST['delete_post'])) {
     </div>
 
     <!-- share modal -->
-    <div id="postShareModal" class="modal">
+<div id="postShareModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Share Post</h2>

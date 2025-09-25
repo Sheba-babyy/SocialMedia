@@ -55,22 +55,24 @@ if ($adminRes && $adminRes->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat in <?php echo htmlspecialchars($row["group_name"]) ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
+     <style>
         body {
-            background-color: #f0f2f5;
+            background-color: #121212;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #e0e0e0;
         }
 
         .chat-container {
             width: 100%;
             max-width: 900px;
-            background: white;
+            background: #1e1e1e;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -79,7 +81,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
         }
 
         .chat-header {
-            background: #0084ff;
+            background: #b71c1c; /* Dark red */
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -92,6 +94,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid #fff;
         }
 
         .chat-header .group-info {
@@ -102,7 +105,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             margin: 0;
             font-size: 18px;
             font-weight: 500;
-            padding-top:20px;
+            padding-top: 20px;
         }
 
         .chat-header .group-info a {
@@ -115,6 +118,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
         .chat-header .options {
             cursor: pointer;
             font-size: 20px;
+            color: white;
         }
 
         .chat-body {
@@ -124,6 +128,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            background-color: #1e1e1e;
         }
 
         .chat-body::-webkit-scrollbar {
@@ -131,7 +136,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
         }
 
         .chat-body::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 3px;
         }
 
@@ -146,17 +151,20 @@ if ($adminRes && $adminRes->num_rows > 0) {
         }
 
         .message.sent {
-            background: #dcf8c6;
+            background: #2d2d2d; /* Dark gray instead of red */
             align-self: flex-end;
             margin-left: auto;
-            border-bottom-right-radius: 2px;
+            border-radius: 12px;
+            color: #fff;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }
 
         .message.received {
-            background: white;
+            background: #2d2d2d;
             align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+            border-radius: 12px;
+            color: #e0e0e0;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.3);
         }
 
         .sender-info {
@@ -164,7 +172,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             align-items: center;
             gap: 8px;
             font-size: 12px;
-            color: #667781;
+            color: #aaa;
         }
 
         .sender-photo, .user-icon {
@@ -175,16 +183,18 @@ if ($adminRes && $adminRes->num_rows > 0) {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f2f5;
+            background-color: #333;
         }
+
         .user-icon i {
             font-size: 12px;
-            color: #0084ff;
+            color: #b71c1c; /* Red accent */
         }
+
         .sender-name {
             font-weight: 500;
             font-size: 12px;
-            color: #0084ff;
+            color: #b71c1c; /* Red accent */
         }
 
         .message-content {
@@ -195,7 +205,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
 
         .message-time {
             font-size: 11px;
-            color: #667781;
+            color: #aaa;
             align-self: flex-end;
         }
 
@@ -205,7 +215,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             top: 5px;
             right: 5px;
             cursor: pointer;
-            color: #ff4444;
+            color: #ff6b6b; /* Light red */
             font-size: 14px;
         }
 
@@ -220,29 +230,39 @@ if ($adminRes && $adminRes->num_rows > 0) {
 
         .file-preview img {
             max-width: 100%;
-            border-radius: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
         }
-
+        .file-preview img:hover {
+            transform: scale(1.03); /* Reduced from 1.05 */
+        }
+        
+        .file-preview video {
+            max-width: 200px;
+            border-radius: 6px; /* Reduced from 10px */
+            border: 1px solid #444; /* Added subtle border */
+        }
         .date-divider {
             text-align: center;
-            color: #667781;
+            color: #aaa;
             font-size: 12px;
             margin: 15px 0;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(45, 45, 45, 0.8);
             padding: 5px;
             border-radius: 5px;
             width: fit-content;
             margin-left: auto;
             margin-right: auto;
+            border: 1px solid #444;
         }
 
         .chat-footer {
             padding: 10px 20px;
-            background: #f0f2f5;
+            background: #1a1a1a;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-top: 1px solid #d9d9d9;
+            border-top: 1px solid #333;
         }
 
         .message-input {
@@ -250,9 +270,14 @@ if ($adminRes && $adminRes->num_rows > 0) {
             padding: 10px 15px;
             border: none;
             border-radius: 20px;
-            background: white;
+            background: #2d2d2d;
             font-size: 14px;
             outline: none;
+            color: #e0e0e0;
+        }
+
+        .message-input::placeholder {
+            color: #888;
         }
 
         .send-btn, .attach-btn {
@@ -260,7 +285,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             border: none;
             cursor: pointer;
             font-size: 20px;
-            color: #0084ff;
+            color: #b71c1c; /* Red accent */
         }
 
         .send-btn:disabled {
@@ -275,23 +300,26 @@ if ($adminRes && $adminRes->num_rows > 0) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .group-content {
-            background: white;
+            background: #1e1e1e;
             border-radius: 10px;
             padding: 20px;
             text-align: center;
             position: relative;
             max-width: 400px;
+            color: #e0e0e0;
+            border: 1px solid #444;
         }
+
         .group-icon {
             font-size: 100px;
-            color: #0084ff;
+            color: #b71c1c; /* Red accent */
             margin: 20px 0;
         }
 
@@ -301,10 +329,10 @@ if ($adminRes && $adminRes->num_rows > 0) {
             align-items: center;
             width: 100px;
             height: 100px;
-            background: #f0f2f5;
+            background: #333;
             border-radius: 50%;
             margin: 20px auto;
-            color: #0084ff;
+            color: #b71c1c; /* Red accent */
             font-size: 50px;
         }
 
@@ -314,17 +342,19 @@ if ($adminRes && $adminRes->num_rows > 0) {
             align-items: center;
             min-height: 200px;
         }
+
         .group-content img {
             width: 200px;
             height: 200px;
             border-radius: 10px;
             object-fit: cover;
+            border: 1px solid #444;
         }
 
         .group-content p {
             margin: 10px 0;
             font-size: 14px;
-            color: #333;
+            color: #e0e0e0;
         }
 
         .close-group {
@@ -333,7 +363,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             right: 10px;
             font-size: 24px;
             cursor: pointer;
-            color: #667781;
+            color: #aaa;
         }
 
         .options-menu {
@@ -341,22 +371,24 @@ if ($adminRes && $adminRes->num_rows > 0) {
             position: absolute;
             right: 20px;
             top: 60px;
-            background: white;
+            background: #2d2d2d;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             z-index: 100;
+            border: 1px solid #444;
         }
 
         .options-menu a {
             display: block;
             padding: 10px 20px;
-            color: #333;
+            color: #e0e0e0;
             text-decoration: none;
             font-size: 14px;
         }
 
         .options-menu a:hover {
-            background: #f0f2f5;
+            background: #333;
+            color: #b71c1c; /* Red accent */
         }
 
         .loader {
@@ -366,7 +398,7 @@ if ($adminRes && $adminRes->num_rows > 0) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(30, 30, 30, 0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -376,76 +408,93 @@ if ($adminRes && $adminRes->num_rows > 0) {
             content: '';
             width: 40px;
             height: 40px;
-            border: 4px solid #0084ff;
+            border: 3px solid #b71c1c; /* Red accent */
             border-top-color: transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-.shared-profile-card {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    background: #f9f9f9;
-    max-width: 250px;
-    transition: background 0.2s;
-}
-.shared-profile-card:hover {
-    background: #f1f1f1;
-}
-.shared-profile-photo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-    object-fit: cover;
-}
-.shared-profile-info {
-    display: flex;
-    flex-direction: column;
-}
-.shared-profile-name {
-    font-weight: bold;
-    font-size: 14px;
-    color: #333;
-}
-.shared-profile-text {
-    font-size: 12px;
-    color: #555;
-}
-/* ===== Shared Post Card ===== */
-.shared-post-card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-width: 250px;
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.shared-post-card:hover {
-    background: #f1f1f1;
-}
-.shared-post-card img,
-.shared-post-card video {
-    width: 100%;
-    border-radius: 10px;
-}
-.shared-post-caption {
-    font-size: 13px;
-    color: #333;
-}
-.shared-post-link {
-    font-size: 12px;
-    color: #0084ff;
-    font-weight: 500;
-}
+
+        .shared-profile-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid #444;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #2d2d2d;
+            max-width: 250px;
+            transition: background 0.2s;
+        }
+
+        .shared-profile-card:hover {
+            background: #333;
+        }
+
+        .shared-profile-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        .shared-profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shared-profile-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .shared-profile-text {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* ===== Shared Post Card ===== */
+        .shared-post-card {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 250px;
+            background: #2d2d2d;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #444;
+        }
+
+        .shared-post-card:hover {
+            background: #333;
+        }
+
+        .shared-post-card img,
+        .shared-post-card video {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        .shared-post-caption {
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        .shared-post-link {
+            font-size: 12px;
+            color: #b71c1c; /* Red accent */
+            font-weight: 500;
+        }
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 600px) {
@@ -513,6 +562,19 @@ if ($adminRes && $adminRes->num_rows > 0) {
     <script>
         let isSending = false;
         let isInitialLoad = true;
+
+        // Add event listener for Enter key when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById("messageInput");
+    
+    // Add Enter key event listener to message input
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent default form submission behavior
+            sendMessage();
+        }
+    });
+});
 
         function sendMessage() {
             if (isSending) return;
@@ -597,21 +659,56 @@ if ($adminRes && $adminRes->num_rows > 0) {
         }
 
             function previewFile() {
-            const file = document.getElementById("fileInput").files[0];
-            const preview = document.getElementById("filePreview");
-            preview.innerHTML = "";
-            if (file) {
-                if (file.type.startsWith('image/')) {
-                    const img = document.createElement("img");
-                    img.src = URL.createObjectURL(file);
-                    img.className = "file-preview";
-                    img.style.maxWidth = "100px";
-                    preview.appendChild(img);
-                } else {
-                    preview.innerHTML = `<p>Selected: ${file.name}</p>`;
-                }
-            }
-        }
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const preview = document.getElementById('filePreview'); // ✅ fixed ID
+
+    if (!file) {
+        preview.innerHTML = "";
+        return;
+    }
+
+    const fileType = file.type;
+    preview.innerHTML = ""; // clear old preview
+
+    if (fileType.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width:150px; border-radius:8px;">`;
+        };
+        reader.readAsDataURL(file);
+
+    } else if (fileType.startsWith("video/")) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `
+                <video controls style="max-width:150px; border-radius:8px;">
+                    <source src="${e.target.result}" type="${fileType}">
+                </video>`;
+        };
+        reader.readAsDataURL(file);
+
+    } else if (fileType === "application/pdf") {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📕 PDF Selected: ${file.name}
+                             </div>`;
+
+    } else if (fileType.includes("msword") || fileType.includes("officedocument")) {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📘 Document Selected: ${file.name}
+                             </div>`;
+
+    } else if (fileType === "application/zip" || fileType === "application/x-zip-compressed") {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📦 ZIP File Selected: ${file.name}
+                             </div>`;
+
+    } else {
+        preview.innerHTML = `<div style="padding:5px; border:1px solid #ccc; border-radius:5px;">
+                                📁 File Selected: ${file.name}
+                             </div>`;
+    }
+}
 
         function toggleOptions() {
             const menu = document.getElementById("optionsMenu");

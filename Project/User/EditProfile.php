@@ -34,6 +34,47 @@ if(isset($_POST['btn_update']))
         <?php
     }
 }
+if(isset($_POST['btn_delete'])) {
+    $uid = (int)$_SESSION['uid'];
+
+    // 1️⃣ Get the Deleted User ID
+    $resDel = $con->query("SELECT user_id FROM tbl_user WHERE user_name='Deleted User' LIMIT 1");
+    $deletedUser = $resDel->fetch_assoc();
+    $deletedUserId = $deletedUser['user_id'] ?? 0;
+    if($deletedUserId == 0) {
+        echo "<script>alert('Deleted User account not found.');</script>";
+        exit;
+    }
+
+    // 2️⃣ Reassign chats, groupchats, complaints, feedback
+    $con->query("UPDATE tbl_chat SET user_from_id=$deletedUserId WHERE user_from_id=$uid");
+    $con->query("UPDATE tbl_chat SET user_to_id=$deletedUserId WHERE user_to_id=$uid");
+    $con->query("UPDATE tbl_groupchat SET user_from_id=$deletedUserId WHERE user_from_id=$uid");
+    $con->query("UPDATE tbl_complaint SET user_id=$deletedUserId WHERE user_id=$uid");
+    $con->query("UPDATE tbl_feedback SET user_id=$deletedUserId WHERE user_id=$uid");
+    $con->query("UPDATE tbl_feedback_comments SET user_id=$deletedUserId WHERE user_id=$uid");
+    $con->query("UPDATE tbl_groupreports SET user_id=$deletedUserId WHERE user_id=$uid");
+    $con->query("UPDATE tbl_reports SET user_id=$deletedUserId WHERE user_id=$uid");
+
+    // 3️⃣ Delete dependent data
+    $con->query("DELETE FROM tbl_post WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_like WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_comment WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_group WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_groupmembers WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_feedback_likes WHERE user_id=$uid");
+    $con->query("DELETE FROM tbl_friends WHERE user_from_id=$uid OR user_to_id=$uid");
+
+    // 4️⃣ Delete the user account
+    $con->query("DELETE FROM tbl_user WHERE user_id=$uid");
+
+    // 5️⃣ Logout and redirect
+    $_SESSION = [];
+    session_destroy();
+    echo "<script>alert('Your account has been deleted successfully.'); window.location='../index.php';</script>";
+    exit;
+}
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -267,7 +308,13 @@ if(isset($_POST['btn_update']))
         <i class="fas fa-lock"></i> Change Password
         </a>
        </div>
-        
+        <div style="text-align: center; margin: 20px 0;">
+    <button type="submit" name="btn_delete" 
+            style="background-color: #b91c1c; color: #fff; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+        <i class="fas fa-trash"></i> Delete My Account
+    </button>
+        </div>
+
         <div class="form-footer">
             <a href="MyProfile.php"><i class="fas fa-arrow-left"></i> Back to Profile</a>
         </div>
@@ -283,6 +330,12 @@ document.getElementById('file_photo').addEventListener('change', function(e) {
             document.querySelector('.round-photo').src = event.target.result;
         };
         reader.readAsDataURL(e.target.files[0]);
+    }
+});
+
+document.querySelector("[name='btn_delete']").addEventListener("click", function(e) {
+    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+        e.preventDefault();
     }
 });
 </script>
