@@ -389,13 +389,21 @@ if (isset($_GET['delete'])) {
                                             ORDER BY f.feedback_date DESC");
                         if ($res->num_rows > 0) {
                             while($data = $res->fetch_assoc()) {
-                                echo "<tr>
-                                        <td><img src='../Assets/Files/UserDocs/{$data['user_photo'] ?: 'default.avif'}' class='user-photo' alt='{$data['user_name']}' onerror=\"this.src='../Assets/Files/UserDocs/default.avif'\"></td>
-                                        <td>{$data['user_name']}</td>
-                                        <td>{$data['feedback_content']}</td>
-                                        <td>" . date('M j, Y g:i A', strtotime($data['feedback_date'])) . "</td>
-                                        <td class='action-cell'><a href='Feedback.php?delete={$data['feedback_id']}' class='delete-btn' onclick='return confirm(\"Delete this feedback?\")'><i class='fas fa-trash'></i> Delete</a></td>
-                                      </tr>";
+                               $photo = (!empty($data['user_photo']) && file_exists("../Assets/Files/UserDocs/{$data['user_photo']}"))
+    ? $data['user_photo']
+    : 'default.avif';
+
+                               echo "<tr>
+    <td><img src='../Assets/Files/UserDocs/$photo' class='user-photo' alt='{$data['user_name']}'></td>
+    <td>{$data['user_name']}</td>
+    <td>{$data['feedback_content']}</td>
+    <td>" . date('M j, Y g:i A', strtotime($data['feedback_date'])) . "</td>
+    <td class='action-cell'>
+        <a href='Feedback.php?delete={$data['feedback_id']}' class='delete-btn' onclick='return confirm(\"Delete this feedback?\")'>
+            <i class='fas fa-trash'></i> Delete
+        </a>
+    </td>
+</tr>";
                             }
                         } else {
                             echo "<tr>
@@ -425,7 +433,6 @@ if (isset($_GET['delete'])) {
                     }, 500);
                 }, 5000);
             }
-        });
     </script>
 </body>
 </html>
