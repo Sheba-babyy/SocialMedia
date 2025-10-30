@@ -74,12 +74,14 @@ $result = $con->query($qry);
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
             min-height: 100vh;
+            padding: 0;
+            margin: 0;
         }
         
         .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-            width: calc(100% - 250px);
+            margin-left: 280px;
+            padding: 0px;
+            width: calc(100% - 280px);
             transition: all 0.3s ease;
         }
         
@@ -409,9 +411,10 @@ $result = $con->query($qry);
         .table-modern tr:nth-child(even) {
             animation-delay: 0.1s;
         }
+        
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="min-h-screen">
     <!-- Sidebar Space -->
     <?php include 'Sidebar.php'?>                
 

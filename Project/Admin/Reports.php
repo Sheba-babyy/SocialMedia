@@ -145,7 +145,7 @@ if (isset($_GET['review_group'])) {
         /* Content area */
         .content-area {
             flex: 1;
-            padding: 30px;
+            padding-left: 25px;
         }
 
         /* Header */

@@ -82,7 +82,7 @@ $totalPages = ceil($totalRows / $limit);
         /* Content area */
         .content-area {
             flex: 1;
-            padding: 30px;
+            padding-left: 25px;
         }
 
         .container {

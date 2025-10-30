@@ -113,7 +113,7 @@ if(isset($_GET['eid']))
         /* Content area */
         .content-area {
             flex: 1;
-            padding: 20px;
+            padding-left: 25px;
         }
 
         /* Header */

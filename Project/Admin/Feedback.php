@@ -72,7 +72,7 @@ if (isset($_GET['delete'])) {
         /* Content area */
         .content-area {
             flex: 1;
-            padding: 30px;
+            padding-left: 25px;
         }
 
         /* Header */
@@ -296,7 +296,6 @@ if (isset($_GET['delete'])) {
                 justify-content: center;
             }
         }
-
         /* Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }

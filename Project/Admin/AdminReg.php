@@ -119,7 +119,7 @@ if(isset($_GET['eid']))
         /* Content area */
         .content-area {
             flex: 1;
-            padding: 20px;
+            padding-left: 25px;
             /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
             display: flex;
             justify-content: center;

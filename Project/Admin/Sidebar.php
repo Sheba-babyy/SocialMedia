@@ -14,6 +14,17 @@
             min-height: 100vh;
             background-color: #f8f9fa;
         }
+        /* For Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For all browsers */
+body {
+  overflow: -moz-scrollbars-none; /* For Firefox (older versions) */
+  -ms-overflow-style: none;       /* For Internet Explorer and Edge */
+  scrollbar-width: none;          /* For Firefox (new versions) */
+}
 
         /* Sidebar */
         .sidebar {
