@@ -2,6 +2,8 @@
 include ("../Assets/Connection/Connection.php");
 session_start();
 
+$error = "";
+
 if(isset($_POST['btn_login']))
 {
     $email = $_POST['txt_email'];
@@ -44,12 +46,7 @@ if(isset($_POST['btn_login']))
     }
     else
     {
-        ?>
-        <script>
-        alert("Invalid");
-        window.location="Login.php";
-        </script>
-        <?php
+        $error = "Invalid email or password.";
     }
 }
 ?>
@@ -257,7 +254,24 @@ if(isset($_POST['btn_login']))
             width: 250px;
             height: 250px;
         }
-        
+        .error-message {
+            width: 100%;
+            background-color: rgba(229, 57, 53, 0.15);
+            border: 1px solid #E53935;
+            color: #ffb3b3;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
         @media (max-width: 768px) {
             .login-container {
                 padding: 30px 20px;
@@ -279,6 +293,10 @@ if(isset($_POST['btn_login']))
             <p>Please enter your credentials to log in</p>
         </div>
         
+        <?php if (!empty($error)) { ?>
+            <div class="error-message"><?= $error ?></div>
+        <?php } ?>
+
         <form id="form1" name="form1" method="post" action="">
             <div class="form-group">
                 <label for="txt_email">Email</label>

@@ -15,16 +15,31 @@
             background-color: #f8f9fa;
         }
         /* For Chrome, Safari and Opera */
-::-webkit-scrollbar {
-  display: none;
-}
+        ::-webkit-scrollbar {
+            display: none;
+        }
 
-/* For all browsers */
-body {
-  overflow: -moz-scrollbars-none; /* For Firefox (older versions) */
-  -ms-overflow-style: none;       /* For Internet Explorer and Edge */
-  scrollbar-width: none;          /* For Firefox (new versions) */
-}
+        /* For all browsers */
+        body {
+            overflow: -moz-scrollbars-none; /* For Firefox (older versions) */
+            -ms-overflow-style: none;       /* For Internet Explorer and Edge */
+            scrollbar-width: none;          /* For Firefox (new versions) */
+        }
+
+        /* Set scrollbar style for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
 
         /* Sidebar */
         .sidebar {

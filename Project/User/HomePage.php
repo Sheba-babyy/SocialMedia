@@ -76,10 +76,18 @@ if (isset($_POST['delete_post'])) {
 
 // Get friend suggestions
 $suggestion_sql = "SELECT u.* FROM tbl_user u 
-                  WHERE u.user_id != '$uid' 
-                  AND u.user_id NOT IN 
-                  (SELECT user_to_id FROM tbl_friends WHERE user_from_id = '$uid')
-                  ORDER BY RAND() LIMIT 4";
+                  WHERE u.user_status = 'active'
+                  AND u.user_id != '$uid'
+                  AND u.user_id NOT IN (
+                      SELECT CASE 
+                          WHEN user_from_id = '$uid' THEN user_to_id 
+                          WHEN user_to_id = '$uid' THEN user_from_id 
+                      END
+                      FROM tbl_friends
+                      WHERE user_from_id = '$uid' OR user_to_id = '$uid'
+                  )
+                  ORDER BY RAND() 
+                  LIMIT 4";
 $suggestion_result = $con->query($suggestion_sql);
 
 // Get group suggestions

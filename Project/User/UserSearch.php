@@ -68,7 +68,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'fetch_comments') {
     $res = $con->query("
         SELECT c.comment_text, c.comment_date, u.user_name, u.user_photo
         FROM tbl_comment c
-        JOIN tbl_user u ON c.user_id = u.user_id
+        JOIN tbl_user u ON c.user_id = u.user_id AND u.user_status=1
         WHERE c.post_id = '$post_id'
         ORDER BY c.comment_date DESC
     ");
@@ -110,7 +110,7 @@ if (isset($_GET['q'])) {
     $full = isset($_GET['full']) && $_GET['full'] == '1';
 
     // users (limit 5)
-    $users = $con->query("SELECT user_id, user_name, user_photo FROM tbl_user WHERE user_name LIKE '%$q%' LIMIT 5");
+    $users = $con->query("SELECT user_id, user_name, user_photo FROM tbl_user WHERE user_status='active'AND user_name LIKE '%$q%' LIMIT 5");
 
     // groups (limit 5) - check membership (status=1 means approved member)
     $groups = $con->query("
@@ -190,7 +190,7 @@ if (isset($_GET['q'])) {
                (SELECT COUNT(*) FROM tbl_comment WHERE post_id = p.post_id) AS comment_count,
                EXISTS(SELECT 1 FROM tbl_like WHERE post_id = p.post_id AND user_id = '$uid') AS user_liked
         FROM tbl_post p
-        JOIN tbl_user u ON p.user_id = u.user_id
+        JOIN tbl_user u ON p.user_id = u.user_id AND u.user_status=1
         WHERE p.post_caption LIKE '%$q%'
         ORDER BY p.post_date DESC
         LIMIT 10

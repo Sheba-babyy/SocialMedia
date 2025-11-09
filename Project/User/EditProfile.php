@@ -22,7 +22,6 @@ if(isset($_POST['btn_update']))
     } else {
         $photo_update = "";
     }
-    
     $upQry="update tbl_user set user_name='".$name."',user_email='".$email."',user_contact='".$contact."'".$photo_update." where user_id='".$_SESSION['uid']."'";
     if($con->query($upQry))
     {
@@ -33,12 +32,15 @@ if(isset($_POST['btn_update']))
         </script>
         <?php
     }
+    else {
+    echo "<script>alert('Update failed: ".$con->error."');</script>";
+}
 }
 if(isset($_POST['btn_delete'])) {
     $uid = (int)$_SESSION['uid'];
 
     // 1️⃣ Get the Deleted User ID
-    $resDel = $con->query("SELECT user_id FROM tbl_user WHERE user_name='Deleted User' LIMIT 1");
+    $resDel = $con->query("SELECT user_id FROM tbl_user WHERE user_status='deleted' LIMIT 1");
     $deletedUser = $resDel->fetch_assoc();
     $deletedUserId = $deletedUser['user_id'] ?? 0;
     if($deletedUserId == 0) {
@@ -53,7 +55,7 @@ if(isset($_POST['btn_delete'])) {
     $con->query("UPDATE tbl_complaint SET user_id=$deletedUserId WHERE user_id=$uid");
     $con->query("UPDATE tbl_feedback SET user_id=$deletedUserId WHERE user_id=$uid");
     $con->query("UPDATE tbl_feedback_comments SET user_id=$deletedUserId WHERE user_id=$uid");
-    $con->query("UPDATE tbl_groupreports SET user_id=$deletedUserId WHERE user_id=$uid");
+    $con->query("UPDATE tbl_group_reports SET user_id=$deletedUserId WHERE user_id=$uid");
     $con->query("UPDATE tbl_reports SET user_id=$deletedUserId WHERE user_id=$uid");
 
     // 3️⃣ Delete dependent data
@@ -66,7 +68,7 @@ if(isset($_POST['btn_delete'])) {
     $con->query("DELETE FROM tbl_friends WHERE user_from_id=$uid OR user_to_id=$uid");
 
     // 4️⃣ Delete the user account
-    $con->query("DELETE FROM tbl_user WHERE user_id=$uid");
+    $con->query("UPDATE tbl_user SET user_status='deleted' WHERE user_id=$uid");
 
     // 5️⃣ Logout and redirect
     $_SESSION = [];
@@ -262,7 +264,7 @@ if(isset($_POST['btn_delete'])) {
             </div>
         </div>
 
-        <table width="100%" border="1" align="center">
+        <table width="100%" align="center">
             <tr>
                 <td>Name</td>
                 <td>

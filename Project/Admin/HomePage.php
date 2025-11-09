@@ -59,21 +59,6 @@ foreach($complaintsMonths as $m){
             font-family: 'Inter', sans-serif;
             @apply bg-gray-100 text-gray-800;
         }
-
-        /* Set scrollbar style for a cleaner look */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #94a3b8;
-        }
         
         .main-content {
             flex: 1;
